@@ -1,0 +1,53 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+}
+
+group = 'tech.ceesar.glamme.ride'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+
+    // Web & JPA
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'   // WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-websocket' // STOMP
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Stripe
+    implementation "com.stripe:stripe-java:29.0.0"
+
+    // Lombok annotations
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // WebClient for external API calls
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql:42.7.2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+    }
+}

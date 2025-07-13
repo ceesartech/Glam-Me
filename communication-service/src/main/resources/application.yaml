@@ -1,0 +1,17 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:communicationdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+twilio:
+  accountSid: ${TWILIO_ACCOUNT_SID}
+  authToken: ${TWILIO_AUTH_TOKEN}
+  fromNumber: ${TWILIO_FROM_NUMBER}
+  baseUrl: ${TWILIO_BASE_URL:https://your-public-hostname.com}  # For TwiML callbacks

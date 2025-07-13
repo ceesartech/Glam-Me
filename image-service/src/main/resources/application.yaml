@@ -1,0 +1,12 @@
+server:
+  port: 8082
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+
+cloud:
+  aws:
+    region: ${AWS_REGION:us-east-1}
+    s3:
+      bucket: ${AWS_S3_BUCKET:glamme-hairstyle-images}

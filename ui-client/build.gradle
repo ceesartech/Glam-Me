@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'tech.ceesar.glamme.ui'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('vaadinVersion', "24.7.3")
+}
+
+dependencies {
+    implementation project(':common')
+
+    // Spring
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Vaadin
+    implementation 'com.vaadin:vaadin-spring-boot-starter'
+
+    // Lombok annotations
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // Jakarta
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'com.vaadin:vaadin-testbench-core'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+    }
+}

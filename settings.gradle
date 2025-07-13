@@ -1,0 +1,13 @@
+rootProject.name = 'Glam-Me'
+
+include 'common'
+include 'auth-service'
+include 'image-service'
+include 'matching-service'
+include 'booking-service'
+include 'reviews-service'
+include 'communication-service'
+include 'social-service'
+include 'ui-client'
+include 'shopping-service'
+include 'ride-service'

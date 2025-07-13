@@ -1,0 +1,21 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:matchingdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+# URL for calling auth-service’s ADMIN endpoint
+auth:
+  service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}

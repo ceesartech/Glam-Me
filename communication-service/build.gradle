@@ -1,0 +1,51 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+}
+
+group = 'tech.ceesar.glamme.communication'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+
+    // Spring Web & Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Lombok annotations
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    //Jakarta
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Twilio SDK
+    implementation 'com.twilio.sdk:twilio:8.31.1'
+
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql:42.7.2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.mockito:mockito-core:latest.release'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release'
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+    }
+}

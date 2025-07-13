@@ -1,0 +1,63 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+}
+
+group = 'tech.ceesar.glamme.booking'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':matching-service')
+
+    // Spring Web & JPA
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Lombok annotations
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // Jakarta
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Stripe SDK
+//    implementation 'com.stripe:stripe-java:20.156.0'
+    implementation "com.stripe:stripe-java:29.0.0"
+
+    // Google Calendar API
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.33.1'
+    implementation 'com.google.api-client:google-api-client:2.0.0'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+    implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
+    implementation 'com.google.http-client:google-http-client-jackson2:1.32.1'
+
+
+    // ICS generation (for Apple calendar download)
+//    implementation 'org.mnode.ical4j:ical4j:3.3.0'
+//    implementation 'org.ical4j:ical4j:3.7.0'
+
+    runtimeOnly 'org.postgresql:postgresql:42.7.2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:latest.release'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // If using JUnit 5
+    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release' // For JUnit 5 and Mockito annotations
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+    }
+}

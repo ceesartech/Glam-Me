@@ -1,0 +1,33 @@
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:3.4.4'
+        classpath 'io.spring.gradle:dependency-management-plugin:1.1.2'
+        classpath 'com.vaadin:vaadin-gradle-plugin:24.7.3'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.vaadin' version '24.7.3'
+}
+
+vaadin {
+    // for the custom theme folder
+    productionMode = true
+    pnpmEnable = false
+}
+
+allprojects {
+    group = 'tech.ceesar.glamme'
+    version = '0.0.1-SNAPSHOT'
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    repositories {
+        mavenCentral()
+    }
+}

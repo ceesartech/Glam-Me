@@ -1,0 +1,56 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+}
+
+group = 'tech.ceesar.glamme.social'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+
+    // Web & JPA
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Lombok annotations
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // Jakarta
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // AWS SDK v2 for S3
+    implementation 'software.amazon.awssdk:s3:2.20.35'
+    implementation 'software.amazon.awssdk:auth:2.20.35'
+
+    // Validation
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql:42.6.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+    }
+}
