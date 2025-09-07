@@ -9,7 +9,11 @@ import tech.ceesar.glamme.common.dto.ApiResponse;
 import tech.ceesar.glamme.common.dto.PagedResponse;
 import tech.ceesar.glamme.matching.dto.*;
 import tech.ceesar.glamme.matching.entity.CustomerPreference;
+import tech.ceesar.glamme.matching.entity.Stylist;
 import tech.ceesar.glamme.matching.service.MatchingService;
+
+import java.math.BigDecimal;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -163,5 +167,144 @@ public class MatchingController {
                     .status(400)
                     .body(ApiResponse.error(e.getMessage()));
         }
+    }
+
+    // === IMAGE SERVICE INTEGRATION ENDPOINTS ===
+
+    /**
+     * Create matches based on image processing results
+     */
+    @PostMapping("/matches/image-based")
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> createImageBasedMatches(
+            @Valid @RequestBody ImageBasedMatchRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            request.setCustomerId(customerId);
+            
+            List<MatchResponse> response = matchingService.createImageBasedMatches(request);
+            return ResponseEntity.ok(ApiResponse.success(response, 
+                    "Image-based matches created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Create direct booking (bypass matching)
+     */
+    @PostMapping("/matches/direct-booking")
+    public ResponseEntity<ApiResponse<MatchResponse>> createDirectBooking(
+            @Valid @RequestBody DirectBookingRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            request.setCustomerId(customerId);
+            
+            MatchResponse response = matchingService.createDirectBooking(request);
+            return ResponseEntity.ok(ApiResponse.success(response, 
+                    "Direct booking created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get hairstyle-specific matches
+     */
+    @GetMapping("/matches/hairstyle")
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> getHairstyleMatches(
+            @RequestParam String hairstyleQuery,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude,
+            @RequestParam(defaultValue = "10") Integer limit,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            List<MatchResponse> response = matchingService.getHairstyleMatches(
+                    customerId, hairstyleQuery, latitude, longitude, limit);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Quick stylist search by hairstyle (no authentication required)
+     */
+    @GetMapping("/stylists/by-hairstyle")
+    public ResponseEntity<ApiResponse<List<StylistResponse>>> searchStylistsByHairstyle(
+            @RequestParam String hairstyle,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            @RequestParam(defaultValue = "25") Integer maxDistanceKm,
+            @RequestParam(defaultValue = "10") Integer limit
+    ) {
+        try {
+            // Create temporary preferences for public search
+            CustomerPreference tempPreferences = CustomerPreference.builder()
+                    .customerId("anonymous")
+                    .latitude(BigDecimal.valueOf(latitude))
+                    .longitude(BigDecimal.valueOf(longitude))
+                    .maxDistanceKm(maxDistanceKm)
+                    .build();
+                    
+            List<Stylist> stylists = matchingService.findStylistsByHairstyleQuery(
+                    hairstyle, tempPreferences, limit);
+                    
+            List<StylistResponse> response = stylists.stream()
+                    .map(this::mapToStylistResponse)
+                    .collect(Collectors.toList());
+                    
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // Helper method to map Stylist to StylistResponse
+    private StylistResponse mapToStylistResponse(Stylist stylist) {
+        return StylistResponse.builder()
+                .id(stylist.getId())
+                .businessName(stylist.getBusinessName())
+                .description(stylist.getDescription())
+                .latitude(stylist.getLatitude())
+                .longitude(stylist.getLongitude())
+                .address(stylist.getAddress())
+                .city(stylist.getCity())
+                .state(stylist.getState())
+                .zipCode(stylist.getZipCode())
+                .phoneNumber(stylist.getPhoneNumber())
+                .email(stylist.getEmail())
+                .website(stylist.getWebsite())
+                .instagramHandle(stylist.getInstagramHandle())
+                .profileImageUrl(stylist.getProfileImageUrl())
+                .portfolioImages(stylist.getPortfolioImages())
+                .specialties(stylist.getSpecialties())
+                .services(stylist.getServices())
+                .priceRangeMin(stylist.getPriceRangeMin())
+                .priceRangeMax(stylist.getPriceRangeMax())
+                .averageRating(stylist.getAverageRating())
+                .totalReviews(stylist.getTotalReviews())
+                .eloRating(stylist.getEloRating())
+                .isVerified(stylist.getIsVerified())
+                .isActive(stylist.getIsActive())
+                .yearsExperience(stylist.getYearsExperience())
+                .certifications(stylist.getCertifications())
+                .languages(stylist.getLanguages())
+                .createdAt(stylist.getCreatedAt())
+                .lastActive(stylist.getLastActive())
+                .build();
     }
 }

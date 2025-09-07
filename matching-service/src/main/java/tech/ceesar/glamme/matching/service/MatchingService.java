@@ -389,4 +389,240 @@ public class MatchingService {
 
         return builder.build();
     }
+
+    // === IMAGE SERVICE INTEGRATION ===
+
+    /**
+     * Create matches based on image processing results
+     */
+    public List<MatchResponse> createImageBasedMatches(ImageBasedMatchRequest request) {
+        log.info("Creating image-based matches for customer: {} with image job: {}", 
+                request.getCustomerId(), request.getImageJobId());
+
+        // Get customer preferences (or use defaults)
+        CustomerPreference preferences = customerPreferenceRepository
+                .findByCustomerId(request.getCustomerId())
+                .orElse(createDefaultPreferences(request.getCustomerId()));
+
+        // Apply request-specific overrides
+        if (request.getMaxDistance() != null) {
+            preferences.setMaxDistanceKm(request.getMaxDistance().intValue());
+        }
+        if (request.getMinPrice() != null) {
+            preferences.setPriceRangeMin(BigDecimal.valueOf(request.getMinPrice().intValue()));
+        }
+        if (request.getMaxPrice() != null) {
+            preferences.setPriceRangeMax(BigDecimal.valueOf(request.getMaxPrice().intValue()));
+        }
+
+        // Find matching stylists based on hairstyle
+        List<Stylist> matchingStylists = findStylistsForHairstyle(request.getHairstyleId(), preferences);
+
+        // Create matches for top stylists
+        List<MatchResponse> matches = matchingStylists.stream()
+                .limit(5) // Top 5 matches
+                .map(stylist -> createImageBasedMatch(request, stylist, preferences))
+                .collect(Collectors.toList());
+
+        log.info("Created {} image-based matches for customer: {}", matches.size(), request.getCustomerId());
+        return matches;
+    }
+
+    /**
+     * Handle direct booking (bypass matching)
+     */
+    public MatchResponse createDirectBooking(DirectBookingRequest request) {
+        log.info("Creating direct booking for customer: {} with stylist: {}", 
+                request.getCustomerId(), request.getStylistId());
+
+        if (request.getStylistId() == null) {
+            throw new RuntimeException("Stylist ID is required for direct booking");
+        }
+
+        Stylist stylist = stylistRepository.findById(request.getStylistId())
+                .orElseThrow(() -> new RuntimeException("Stylist not found"));
+
+        // Create match with high priority (direct booking)
+        Match match = Match.builder()
+                .customerId(request.getCustomerId())
+                .stylistId(request.getStylistId())
+                .matchScore(95.0) // High score for direct bookings
+                .matchType(Match.MatchType.DIRECT)
+                .status(Match.Status.PENDING)
+                .preferredDate(request.getPreferredDate())
+                .notes(request.getNotes())
+                .expiresAt(LocalDateTime.now().plusHours(48)) // 48 hours for direct bookings
+                .build();
+
+        match = matchRepository.save(match);
+
+        // Publish direct booking event
+        eventService.publishEvent("glamme-bus", "matching-service", "direct.booking.created", Map.of(
+                "matchId", match.getId(),
+                "customerId", request.getCustomerId(),
+                "stylistId", request.getStylistId(),
+                "serviceType", request.getServiceType(),
+                "hairstyleName", request.getHairstyleName() != null ? request.getHairstyleName() : "",
+                "imageJobId", request.getImageJobId() != null ? request.getImageJobId() : ""
+        ));
+
+        log.info("Successfully created direct booking: {}", match.getId());
+        return mapToMatchResponse(match, stylist);
+    }
+
+    /**
+     * Get hairstyle-specific matches (combines both image and direct booking flows)
+     */
+    public List<MatchResponse> getHairstyleMatches(String customerId, String hairstyleQuery, 
+                                                   Double latitude, Double longitude, Integer limit) {
+        log.info("Getting hairstyle matches for customer: {} with query: {}", customerId, hairstyleQuery);
+
+        // Get or create customer preferences
+        CustomerPreference preferences = customerPreferenceRepository
+                .findByCustomerId(customerId)
+                .orElse(createDefaultPreferences(customerId));
+
+        // Override location if provided
+        if (latitude != null && longitude != null) {
+            preferences.setLatitude(BigDecimal.valueOf(latitude));
+            preferences.setLongitude(BigDecimal.valueOf(longitude));
+        }
+
+        // Find stylists specializing in the requested hairstyle
+        List<Stylist> stylists = findStylistsByHairstyleQuery(hairstyleQuery, preferences, limit != null ? limit : 10);
+
+        // Create potential matches (not saved to DB until user confirms)
+        return stylists.stream()
+                .map(stylist -> createPotentialMatch(customerId, stylist, hairstyleQuery, preferences))
+                .collect(Collectors.toList());
+    }
+
+    // === HELPER METHODS ===
+
+    private CustomerPreference createDefaultPreferences(String customerId) {
+        return CustomerPreference.builder()
+                .customerId(customerId)
+                .maxDistanceKm(25) // 25km default
+                .priceRangeMin(BigDecimal.valueOf(50))
+                .priceRangeMax(BigDecimal.valueOf(300))
+                .minRating(BigDecimal.valueOf(4.0))
+                .preferVerified(true)
+                .preferExperienced(false)
+                .minYearsExperience(1)
+                .build();
+    }
+
+    private List<Stylist> findStylistsForHairstyle(String hairstyleId, CustomerPreference preferences) {
+        // This would integrate with the image service to get hairstyle details
+        // For now, find stylists within preferences
+        return matchingAlgorithmService.findMatchingStylists(preferences, 10);
+    }
+
+    public List<Stylist> findStylistsByHairstyleQuery(String query, CustomerPreference preferences, int limit) {
+        // Find stylists whose specialties match the hairstyle query
+        List<Stylist> allStylists = stylistRepository.findBySpecialtiesContainingIgnoreCase(query);
+        
+        if (allStylists.isEmpty()) {
+            // Fallback to general matching
+            return matchingAlgorithmService.findMatchingStylists(preferences, limit);
+        }
+
+        // Filter by location and other preferences
+        return allStylists.stream()
+                .filter(stylist -> matchesPreferences(stylist, preferences))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    private boolean matchesPreferences(Stylist stylist, CustomerPreference preferences) {
+        // Distance check
+        if (preferences.getLatitude() != null && preferences.getLongitude() != null) {
+            double distance = calculateDistance(
+                    preferences.getLatitude().doubleValue(), preferences.getLongitude().doubleValue(),
+                    stylist.getLatitude().doubleValue(), stylist.getLongitude().doubleValue()
+            );
+            if (distance > preferences.getMaxDistanceKm()) {
+                return false;
+            }
+        }
+
+        // Price range check
+        if (stylist.getPriceRangeMin() != null && stylist.getPriceRangeMax() != null) {
+            if (stylist.getPriceRangeMin().compareTo(preferences.getPriceRangeMax()) > 0 ||
+                stylist.getPriceRangeMax().compareTo(preferences.getPriceRangeMin()) < 0) {
+                return false;
+            }
+        }
+
+        // Rating check
+        if (preferences.getMinRating() != null && stylist.getAverageRating() != null) {
+            if (stylist.getAverageRating().compareTo(preferences.getMinRating()) < 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private MatchResponse createImageBasedMatch(ImageBasedMatchRequest request, Stylist stylist, 
+                                                CustomerPreference preferences) {
+        double matchScore = matchingAlgorithmService.calculateMatchScore(
+                request.getCustomerId(), stylist.getId(), preferences, stylist);
+
+        Match match = Match.builder()
+                .customerId(request.getCustomerId())
+                .stylistId(stylist.getId())
+                .matchScore(matchScore)
+                .matchType(Match.MatchType.IMAGE_BASED)
+                .status(Match.Status.PENDING)
+                .preferredDate(request.getPreferredDate())
+                .notes(request.getNotes())
+                .expiresAt(LocalDateTime.now().plusHours(24))
+                .build();
+
+        match = matchRepository.save(match);
+
+        // Publish event
+        eventService.publishEvent("glamme-bus", "matching-service", "image.match.created", Map.of(
+                "matchId", match.getId(),
+                "customerId", request.getCustomerId(),
+                "stylistId", stylist.getId(),
+                "imageJobId", request.getImageJobId(),
+                "hairstyleId", request.getHairstyleId() != null ? request.getHairstyleId() : ""
+        ));
+
+        return mapToMatchResponse(match, stylist);
+    }
+
+    private MatchResponse createPotentialMatch(String customerId, Stylist stylist, String hairstyleQuery, 
+                                               CustomerPreference preferences) {
+        double matchScore = matchingAlgorithmService.calculateMatchScore(
+                customerId, stylist.getId(), preferences, stylist);
+
+        // Create a potential match (not saved to DB)
+        Match potentialMatch = Match.builder()
+                .customerId(customerId)
+                .stylistId(stylist.getId())
+                .matchScore(matchScore)
+                .matchType(Match.MatchType.HAIRSTYLE_QUERY)
+                .status(Match.Status.POTENTIAL) // Custom status for potential matches
+                .build();
+
+        return mapToMatchResponse(potentialMatch, stylist);
+    }
+
+    private double calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
+        // Haversine formula for distance calculation
+        final int R = 6371; // Radius of the earth in km
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c;
+
+        return distance;
+    }
 }

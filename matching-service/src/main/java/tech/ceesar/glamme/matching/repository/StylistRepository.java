@@ -58,4 +58,9 @@ public interface StylistRepository extends JpaRepository<Stylist, String> {
     
     @Query("SELECT COUNT(s) FROM Stylist s WHERE s.isActive = true AND s.isVerified = true")
     long countVerifiedStylists();
+    
+    // For hairstyle-based search integration
+    @Query("SELECT s FROM Stylist s WHERE s.isActive = true AND " +
+           "EXISTS (SELECT sp FROM s.specialties sp WHERE LOWER(sp) LIKE LOWER(CONCAT('%', :specialty, '%')))")
+    List<Stylist> findBySpecialtiesContainingIgnoreCase(@Param("specialty") String specialty);
 }

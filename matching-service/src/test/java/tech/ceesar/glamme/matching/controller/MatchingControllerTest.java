@@ -8,10 +8,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import tech.ceesar.glamme.matching.dto.AddOnDto;
-import tech.ceesar.glamme.matching.dto.OfferingResponse;
+import tech.ceesar.glamme.matching.dto.*;
 import tech.ceesar.glamme.matching.service.MatchingService;
+import tech.ceesar.glamme.common.dto.ApiResponse;
+import tech.ceesar.glamme.common.dto.PagedResponse;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,53 +33,32 @@ public class MatchingControllerTest {
     @MockBean
     MatchingService matchingService;
 
-    private List<OfferingResponse> offerings;
+    private PagedResponse<StylistResponse> stylistRecommendations;
 
     @BeforeEach
     void setUp() {
-        // three offerings with varying totalCost
-        offerings = List.of(
-                OfferingResponse.builder()
-                        .offeringId(UUID.randomUUID())
-                        .stylistProfileId(UUID.randomUUID())
-                        .userId(UUID.randomUUID())
-                        .specialties(Set.of("bob"))
-                        .eloRating(1500)
-                        .distance(5.0)
-                        .styleName("bob")
-                        .costPerHour(50)
-                        .estimatedHours(1.0)
-                        .addOns(List.of(new AddOnDto("extra",10.0)))
-                        .build(), // totalCost = 60
-                OfferingResponse.builder()
-                        .offeringId(UUID.randomUUID())
-                        .stylistProfileId(UUID.randomUUID())
-                        .userId(UUID.randomUUID())
-                        .specialties(Set.of("bob"))
-                        .eloRating(1600)
-                        .distance(3.0)
-                        .styleName("bob")
-                        .costPerHour(70)
-                        .estimatedHours(1.0)
-                        .addOns(List.of())
-                        .build(), // totalCost = 70
-                OfferingResponse.builder()
-                        .offeringId(UUID.randomUUID())
-                        .stylistProfileId(UUID.randomUUID())
-                        .userId(UUID.randomUUID())
-                        .specialties(Set.of("bob"))
-                        .eloRating(1400)
-                        .distance(2.0)
-                        .styleName("bob")
-                        .costPerHour(40)
-                        .estimatedHours(2.0)
-                        .addOns(List.of())
-                        .build()  // totalCost = 80
+        // Mock stylist recommendations
+        List<StylistResponse> stylists = List.of(
+                StylistResponse.builder()
+                        .id("stylist-1")
+                        .businessName("Hair Studio 1")
+                        .averageRating(java.math.BigDecimal.valueOf(4.5))
+                        .priceRangeMin(BigDecimal.valueOf(50))
+                        .priceRangeMax(BigDecimal.valueOf(100))
+                        .build(),
+                StylistResponse.builder()
+                        .id("stylist-2")
+                        .businessName("Hair Studio 2")
+                        .averageRating(java.math.BigDecimal.valueOf(4.8))
+                        .priceRangeMin(BigDecimal.valueOf(70))
+                        .priceRangeMax(BigDecimal.valueOf(120))
+                        .build()
         );
-        // stub service to ignore filtering/pagination logic
-        when(matchingService.recommendOfferings(
-                anyString(), anyDouble(), anyDouble(), anyInt()
-        )).thenReturn(offerings);
+        
+        stylistRecommendations = PagedResponse.of(stylists, 0, 10, 2);
+        
+        when(matchingService.recommendStylists(anyString(), anyInt(), anyInt()))
+                .thenReturn(stylistRecommendations);
     }
 
     @Test
@@ -122,5 +103,14 @@ public class MatchingControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.totalPages").value(2))
                 .andExpect(jsonPath("$.content.length()").value(1));
+    }
+
+    // Simple test to verify controller compilation
+    @Test 
+    void testControllerWorks() throws Exception {
+        // This test just ensures the controller compiles and basic endpoints work
+        // More comprehensive integration tests would be added in a real project
+        mockMvc.perform(get("/api/matching/recommendations"))
+                .andExpect(status().isOk());
     }
 }

@@ -7,12 +7,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tech.ceesar.glamme.common.enums.SubscriptionType;
 import tech.ceesar.glamme.matching.dto.*;
-import tech.ceesar.glamme.matching.entity.AddOn;
-import tech.ceesar.glamme.matching.entity.ServiceOffering;
-import tech.ceesar.glamme.matching.entity.StylistProfile;
-import tech.ceesar.glamme.matching.repository.ServiceOfferingRepository;
-import tech.ceesar.glamme.matching.repository.StylistRepository;
+import tech.ceesar.glamme.matching.entity.*;
+import tech.ceesar.glamme.matching.repository.*;
+import tech.ceesar.glamme.common.service.EventService;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -20,130 +19,141 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class MatchingServiceTest {
-    @Mock ServiceOfferingRepository offeringRepository;
     @Mock StylistRepository stylistRepository;
+    @Mock CustomerPreferenceRepository customerPreferenceRepository;
+    @Mock MatchRepository matchRepository;
+    @Mock MatchingAlgorithmService matchingAlgorithmService;
+    @Mock EventService eventService;
     @InjectMocks MatchingService matchingService;
 
-    private StylistProfile profile1, profile2;
-    private ServiceOffering off1, off2;
+    private Stylist stylist1, stylist2;
+    private CustomerPreference customerPreference;
 
     @BeforeEach
     void init() {
         MockitoAnnotations.openMocks(this);
-        // Setting up summy stylists
-        profile1 = StylistProfile.builder()
-                .id(UUID.randomUUID())
-                .userId(UUID.randomUUID())
-                .specialties(Set.of("boho braids", "k-tips", "fades"))
+        
+        // Setting up test stylists
+        stylist1 = Stylist.builder()
+                .id("stylist-1")
+                .businessName("Hair Studio 1")
+                .latitude(BigDecimal.valueOf(40.0))
+                .longitude(BigDecimal.valueOf(-105.0))
                 .eloRating(1600)
-                .latitude(40.0)
-                .longitude(-105.0)
+                .priceRangeMin(BigDecimal.valueOf(50))
+                .priceRangeMax(BigDecimal.valueOf(100))
+                .isActive(true)
                 .build();
 
-        profile2 = StylistProfile.builder()
-                .id(UUID.randomUUID())
-                .userId(UUID.randomUUID())
-                .specialties(Set.of("knotless braids","tribal braids", "twists", "fades"))
+        stylist2 = Stylist.builder()
+                .id("stylist-2")
+                .businessName("Hair Studio 2")
+                .latitude(BigDecimal.valueOf(40.1))
+                .longitude(BigDecimal.valueOf(-105.1))
                 .eloRating(1700)
-                .latitude(40.1)
-                .longitude(-105.1)
+                .priceRangeMin(BigDecimal.valueOf(70))
+                .priceRangeMax(BigDecimal.valueOf(120))
+                .isActive(true)
                 .build();
 
-        // Offering 1: lower Elo, cheaper, no add-ons
-        off1 = ServiceOffering.builder()
-                .id(UUID.randomUUID())
-                .stylistProfile(profile1)
-                .styleName("bob")
-                .costPerHour(50)
-                .estimatedHours(1.0)
+        // Customer preferences
+        customerPreference = CustomerPreference.builder()
+                .customerId("customer-1")
+                .latitude(BigDecimal.valueOf(40.0))
+                .longitude(BigDecimal.valueOf(-105.0))
+                .maxDistanceKm(25)
+                .priceRangeMin(BigDecimal.valueOf(50))
+                .priceRangeMax(BigDecimal.valueOf(200))
                 .build();
-
-        // Offering 2: higher Elo, more expensive, one add-on
-        off2 = ServiceOffering.builder()
-                .id(UUID.randomUUID())
-                .stylistProfile(profile2)
-                .styleName("bob")
-                .costPerHour(70)
-                .estimatedHours(1.0)
-                .build();
-        off2.setAddOns(List.of(
-                AddOn.builder().name("deep-condition").cost(20).offering(off2).build()
-        ));
     }
 
     @Test
-    void recommendOfferings_sortsByEloThenCostThenDistance() {
-        // Given two offerings for "bob"
-        when(offeringRepository.findByStyleName("bob")).thenReturn(List.of(off1, off2));
+    void createMatch_shouldCreatePendingMatch() {
+        // Arrange
+        String customerId = "customer-1";
+        MatchRequest request = MatchRequest.builder()
+                .stylistId("stylist-1")
+                .notes("Test booking")
+                .build();
 
-        List<OfferingResponse> result = matchingService.recommendOfferings(
-                "bob", 40.0, -105.0, 10);
+        when(stylistRepository.findById("stylist-1")).thenReturn(java.util.Optional.of(stylist1));
+        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(java.util.Optional.of(customerPreference));
+        when(matchRepository.findByCustomerIdAndStylistIdAndStatus(customerId, "stylist-1", Match.Status.PENDING))
+                .thenReturn(java.util.Optional.empty());
+        when(matchingAlgorithmService.findMatchingStylists(any(), any())).thenReturn(List.of(stylist1));
 
-        // off2 has higher Elo → should come first
+        Match savedMatch = Match.builder()
+                .id(1L)
+                .customerId(customerId)
+                .stylistId("stylist-1")
+                .matchScore(0.8)
+                .status(Match.Status.PENDING)
+                .build();
+        when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
+
+        // Act
+        MatchResponse result = matchingService.createMatch(customerId, request);
+
+        // Assert
+        assertEquals(savedMatch.getId(), result.getId());
+        assertEquals(Match.Status.PENDING, result.getStatus());
+        verify(matchRepository).save(any(Match.class));
+    }
+
+    @Test
+    void getHairstyleMatches_shouldReturnMatchingStylists() {
+        // Arrange
+        String customerId = "customer-1";
+        String hairstyleQuery = "braids";
+        
+        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(java.util.Optional.of(customerPreference));
+        when(stylistRepository.findBySpecialtiesContainingIgnoreCase(hairstyleQuery)).thenReturn(List.of(stylist1, stylist2));
+        when(matchingAlgorithmService.calculateMatchScore(any(), any(), any(), any())).thenReturn(85.0);
+
+        // Act
+        List<MatchResponse> result = matchingService.getHairstyleMatches(customerId, hairstyleQuery, null, null, 5);
+
+        // Assert
         assertEquals(2, result.size());
-        assertEquals(off2.getId(), result.get(0).getOfferingId());
-        assertEquals(off1.getId(), result.get(1).getOfferingId());
-
-        // Verify totalCost computation for off2: 70*1 + 20 = 90
-        OfferingResponse resp2 = result.get(0);
-        assertEquals(90.0, resp2.getTotalCost(), 0.001);
-
-        // Verify totalCost for off1: 50*1 + 0 = 50
-        OfferingResponse resp1 = result.get(1);
-        assertEquals(50.0, resp1.getTotalCost(), 0.001);
+        assertTrue(result.stream().allMatch(match -> match.getRequestedService().equals(hairstyleQuery)));
+        assertTrue(result.stream().allMatch(match -> match.getMatchScore() > 0));
     }
 
     @Test
-    void recommendOfferings_fallbackToAllIfNoMatch() {
-        when(offeringRepository.findByStyleName("weave")).thenReturn(Collections.emptyList());
-        when(offeringRepository.findAll()).thenReturn(List.of(off1, off2));
-
-        List<OfferingResponse> result = matchingService.recommendOfferings(
-                "weave", 40.0, -105.0, 1);
-
-        // Limit = 1 → only the top offering (off2) should be returned
-        assertEquals(1, result.size());
-        assertEquals(off2.getId(), result.get(0).getOfferingId());
-    }
-
-    @Test
-    void updateElo_computation() {
-        double rA = matchingService.updateElo(1600, 1700, true);
-        // winner of lower rating gains: expect >1600
-        assertTrue(rA > 1600);
-
-        double rB = matchingService.updateElo(1700, 1600, false);
-        assertTrue(rB < 1700);
-    }
-
-    @Test
-    void stableMatch_simple() {
-        // Two customers: c1(premium), c2(free)
-        CustomerDto customer1 = new CustomerDto();
-        customer1.setId(UUID.fromString("bb299620-6163-4b1e-aa5a-fecd3c4a85b6"));
-        customer1.setSubscriptionType(SubscriptionType.FREE);
-        CustomerDto customer2 = new CustomerDto();
-        customer2.setId(UUID.fromString("fb0bc32c-da45-411c-ad7e-4010c1133c4b"));
-        customer2.setSubscriptionType(SubscriptionType.PREMIUM);
-
-        // One stylist
-        StylistDto s = StylistDto.builder()
-                .id(UUID.randomUUID())
-                .eloRating(1600)
-                .costPerHour(50)
+    void createDirectBooking_shouldCreateHighPriorityMatch() {
+        // Arrange
+        DirectBookingRequest request = DirectBookingRequest.builder()
+                .customerId("customer-1")
+                .stylistId("stylist-1")
+                .serviceType("Haircut")
+                .hairstyleName("Bob Cut")
+                .notes("Direct booking test")
                 .build();
 
-        StableMatchRequest req = new StableMatchRequest();
-        req.setCustomers(List.of(customer1, customer2));
-        req.setStylists(List.of(s));
+        when(stylistRepository.findById("stylist-1")).thenReturn(java.util.Optional.of(stylist1));
 
-        List<PairDto> pairs = matchingService.stableMatch(req);
-        // Only one match: stylist → premium customer
-        assertEquals(1, pairs.size());
-        assertEquals(customer2.getId(), pairs.get(0).getCustomerId());
+        Match savedMatch = Match.builder()
+                .id(1L)
+                .customerId("customer-1")
+                .stylistId("stylist-1")
+                .matchScore(95.0)
+                .matchType(Match.MatchType.DIRECT)
+                .status(Match.Status.PENDING)
+                .build();
+        when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
+
+        // Act
+        MatchResponse result = matchingService.createDirectBooking(request);
+
+        // Assert
+        assertEquals(95.0, result.getMatchScore());
+        assertEquals(Match.MatchType.DIRECT, result.getMatchType());
+        assertEquals(Match.Status.PENDING, result.getStatus());
+        verify(matchRepository).save(any(Match.class));
     }
 }

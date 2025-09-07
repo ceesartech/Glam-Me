@@ -11,7 +11,7 @@ import tech.ceesar.glamme.matching.client.AuthClient;
 import tech.ceesar.glamme.matching.dto.AddOnDto;
 import tech.ceesar.glamme.matching.dto.OnboardingStylistResuest;
 import tech.ceesar.glamme.matching.dto.ServiceOfferingDto;
-import tech.ceesar.glamme.matching.entity.StylistProfile;
+import tech.ceesar.glamme.matching.entity.Stylist;
 import tech.ceesar.glamme.matching.repository.ServiceOfferingRepository;
 import tech.ceesar.glamme.matching.repository.StylistRepository;
 
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class StylistOnboardingServiceTest {
 
     @Mock
-    StylistRepository profileRepo;
+    StylistRepository stylistRepository;
     @Mock
     ServiceOfferingRepository offeringRepo;
     @Mock
@@ -59,12 +59,12 @@ class StylistOnboardingServiceTest {
                 ))
                 .build();
 
-        StylistProfile savedProfile = StylistProfile.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
+        Stylist savedStylist = Stylist.builder()
+                .id(userId.toString())
+                .businessName("Test Business")
                 .build();
-        when(profileRepo.save(any(StylistProfile.class)))
-                .thenReturn(savedProfile);
+        when(stylistRepository.save(any(Stylist.class)))
+                .thenReturn(savedStylist);
         when(offeringRepo.save(any()))
                 .thenAnswer(i -> i.getArgument(0));
 
@@ -72,7 +72,7 @@ class StylistOnboardingServiceTest {
         service.onboardStylist(req);
 
         // Assert
-        verify(profileRepo).save(any(StylistProfile.class));
+        verify(stylistRepository).save(any(Stylist.class));
         verify(offeringRepo).save(any());
         verify(authClient).grantRole(userId, "STYLIST");
     }
