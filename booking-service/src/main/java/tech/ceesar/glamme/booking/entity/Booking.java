@@ -132,4 +132,33 @@ public class Booking {
     public enum LocationType {
         SALON, HOME, MOBILE, VIRTUAL
     }
+
+    public enum ServiceType {
+        HAIRCUT, STYLING, COLORING, TREATMENT, MAKEUP, NAILS, MASSAGE, CONSULTATION
+    }
+
+    public enum Service {
+        BASIC_CUT("Basic Haircut", 30, ServiceType.HAIRCUT),
+        STYLING("Hair Styling", 45, ServiceType.STYLING),
+        COLORING("Hair Coloring", 120, ServiceType.COLORING),
+        TREATMENT("Hair Treatment", 60, ServiceType.TREATMENT),
+        MAKEUP("Makeup Application", 90, ServiceType.MAKEUP),
+        NAILS("Nail Service", 60, ServiceType.NAILS),
+        MASSAGE("Scalp Massage", 30, ServiceType.MASSAGE),
+        CONSULTATION("Style Consultation", 30, ServiceType.CONSULTATION);
+
+        private final String displayName;
+        private final int defaultDurationMinutes;
+        private final ServiceType type;
+
+        Service(String displayName, int defaultDurationMinutes, ServiceType type) {
+            this.displayName = displayName;
+            this.defaultDurationMinutes = defaultDurationMinutes;
+            this.type = type;
+        }
+
+        public String getDisplayName() { return displayName; }
+        public int getDefaultDurationMinutes() { return defaultDurationMinutes; }
+        public ServiceType getType() { return type; }
+    }
 }

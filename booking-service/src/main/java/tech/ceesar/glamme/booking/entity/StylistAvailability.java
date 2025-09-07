@@ -69,4 +69,23 @@ public class StylistAvailability {
     public enum DayOfWeek {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
     }
+
+    public enum Service {
+        BASIC_CUT("Basic Haircut"),
+        STYLING("Hair Styling"),
+        COLORING("Hair Coloring"),
+        TREATMENT("Hair Treatment"),
+        MAKEUP("Makeup Application"),
+        NAILS("Nail Service"),
+        MASSAGE("Scalp Massage"),
+        CONSULTATION("Style Consultation");
+
+        private final String displayName;
+
+        Service(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() { return displayName; }
+    }
 }

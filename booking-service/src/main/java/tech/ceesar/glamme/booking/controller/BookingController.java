@@ -128,4 +128,86 @@ public class BookingController {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    /**
+     * Set stylist availability
+     */
+    @PostMapping("/availability")
+    public ResponseEntity<ApiResponse<AvailabilityResponse>> setAvailability(
+            @Valid @RequestBody AvailabilityRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String stylistId = authentication.getName();
+            AvailabilityResponse response = bookingService.setStylistAvailability(stylistId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Availability set successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get stylist availability
+     */
+    @GetMapping("/availability/{stylistId}")
+    public ResponseEntity<ApiResponse<List<AvailabilityResponse>>> getAvailability(
+            @PathVariable String stylistId
+    ) {
+        try {
+            List<AvailabilityResponse> response = bookingService.getStylistAvailability(stylistId);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get booking statistics
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<BookingStats>> getBookingStats(
+            Authentication authentication
+    ) {
+        try {
+            String userId = authentication.getName();
+            BookingStats stats = bookingService.getBookingStats(userId);
+            return ResponseEntity.ok(ApiResponse.success(stats));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Reschedule booking
+     */
+    @PostMapping("/{bookingId}/reschedule")
+    public ResponseEntity<ApiResponse<BookingResponse>> rescheduleBooking(
+            @PathVariable String bookingId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime newDateTime,
+            Authentication authentication
+    ) {
+        try {
+            String userId = authentication.getName();
+            BookingResponse response = bookingService.rescheduleBooking(bookingId, userId, newDateTime);
+            return ResponseEntity.ok(ApiResponse.success(response, "Booking rescheduled successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Health check endpoint
+     */
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Booking service is operational with complete functionality");
+    }
 }

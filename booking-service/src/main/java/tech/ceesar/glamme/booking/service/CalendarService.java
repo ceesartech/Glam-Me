@@ -13,4 +13,10 @@ public interface CalendarService {
      * Delete the calendar event for this booking, if any.
      */
     void deleteEvent(Booking booking);
+
+    /**
+     * Update the calendar event for this booking.
+     * @return the updated event ID
+     */
+    String updateEvent(Booking booking);
 }
