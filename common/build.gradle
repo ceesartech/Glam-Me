@@ -19,9 +19,8 @@
 //}
 
 plugins {
-    id 'org.springframework.boot' version '3.4.4'
-    id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
+    id 'java-library'
 }
 
 group = 'tech.ceesar.glamme.common'
@@ -47,9 +46,50 @@ dependencies {
     // Jackson annotations (for JSON serialization)
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 
-    // Spring web imports and annotations
-    compileOnly 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Spring core for annotations and utilities
+    implementation 'org.springframework:spring-core:6.0.9'
+    implementation 'org.springframework:spring-context:6.0.9'
+
+    // AWS SDK v2 Core
+    implementation 'software.amazon.awssdk:s3:2.20.162'
+    implementation 'software.amazon.awssdk:rds:2.20.162'
+    implementation 'software.amazon.awssdk:elasticache:2.20.162'
+    implementation 'software.amazon.awssdk:sqs:2.20.162'
+    implementation 'software.amazon.awssdk:secretsmanager:2.20.162'
+    implementation 'software.amazon.awssdk:kms:2.20.162'
+    implementation 'software.amazon.awssdk:cloudwatch:2.20.162'
+    implementation 'software.amazon.awssdk:eventbridge:2.20.162'
+    implementation 'software.amazon.awssdk:cloudwatchlogs:2.20.162'
+    implementation 'software.amazon.awssdk:opensearch:2.20.162'
+
+    // OpenSearch Java Client
+    implementation 'org.opensearch.client:opensearch-java:2.7.0'
+
+    // AWS X-Ray for distributed tracing (commented out due to dependency issues)
+    // implementation 'com.amazonaws:aws-xray-recorder-sdk-core:2.14.1'
+    // implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.14.1'
+
+    // Redis client for ElastiCache
+    implementation 'redis.clients:jedis:4.4.3'
+
+    // PostgreSQL driver for Aurora
+    implementation 'org.postgresql:postgresql:42.7.2'
+
+    // Resilience4j for circuit breakers and rate limiting
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
+    implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.1.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.1.0'
+
+    // Spring Session Redis for distributed sessions
+    implementation 'org.springframework.session:spring-session-data-redis'
+
+    // Spring Scheduling for message consumers
+    implementation 'org.springframework:spring-context-support'
+
+    // AppConfig for feature flags
+    implementation 'software.amazon.awssdk:appconfig:2.20.35'
+    implementation 'software.amazon.awssdk:appconfigdata:2.20.35'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }
