@@ -18,7 +18,7 @@ echo "🚀 Setting up CI/CD IAM Role for GlamMe..."
 echo "📋 Creating IAM policy..."
 POLICY_ARN=$(aws iam create-policy \
     --policy-name GlamMe-CICD-Policy \
-    --policy-document file://iac/cicd-iam-policy.json \
+    --policy-document file://deployment/iac/cicd-iam-policy.json \
     --description "IAM policy for GlamMe CI/CD pipeline" \
     --region $AWS_REGION \
     --profile $AWS_PROFILE \
@@ -31,7 +31,7 @@ echo "✅ Created IAM policy: $POLICY_ARN"
 echo "👤 Creating IAM role..."
 aws iam create-role \
     --role-name $ROLE_NAME \
-    --assume-role-policy-document file://iac/cicd-trust-policy.json \
+    --assume-role-policy-document file://deployment/iac/cicd-trust-policy.json \
     --description "IAM role for GlamMe GitHub Actions CI/CD" \
     --region $AWS_REGION \
     --profile $AWS_PROFILE
