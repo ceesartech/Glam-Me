@@ -53,10 +53,22 @@ dependencies {
     // Jackson annotations (for JSON serialization)
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 
-    // Spring Web for exception annotations and utilities
+    // Spring Boot for configuration and annotations
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Spring Framework core
     implementation 'org.springframework:spring-core'
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-web'
+
+    // Spring Boot auto-configuration
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    // Jackson for JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Jakarta annotations
+    implementation 'jakarta.annotation:jakarta.annotation-api'
 
     // AWS SDK v2 Core
     implementation 'software.amazon.awssdk:s3:2.20.162'
