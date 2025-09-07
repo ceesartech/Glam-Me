@@ -1,12 +1,12 @@
 package tech.ceesar.glamme.booking.controller;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tech.ceesar.glamme.booking.dto.*;
+import tech.ceesar.glamme.booking.service.BookingService;
 import tech.ceesar.glamme.common.dto.ApiResponse;
 
 import java.time.LocalDateTime;
@@ -14,10 +14,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-@RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
@@ -196,6 +199,103 @@ public class BookingController {
             String userId = authentication.getName();
             BookingResponse response = bookingService.rescheduleBooking(bookingId, userId, newDateTime);
             return ResponseEntity.ok(ApiResponse.success(response, "Booking rescheduled successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get upcoming bookings for a stylist
+     */
+    @GetMapping("/stylist/{stylistId}/upcoming")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getUpcomingStylistBookings(
+            @PathVariable String stylistId,
+            @RequestParam(defaultValue = "7") int daysAhead
+    ) {
+        try {
+            LocalDateTime startDate = LocalDateTime.now();
+            LocalDateTime endDate = startDate.plusDays(daysAhead);
+            List<BookingResponse> response = bookingService.getUpcomingBookingsForStylist(stylistId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get booking history for customer
+     */
+    @GetMapping("/customer/{customerId}/history")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getCustomerBookingHistory(
+            @PathVariable String customerId,
+            @RequestParam(defaultValue = "30") int daysBack
+    ) {
+        try {
+            LocalDateTime endDate = LocalDateTime.now();
+            LocalDateTime startDate = endDate.minusDays(daysBack);
+            List<BookingResponse> response = bookingService.getCustomerBookingHistory(customerId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get stylist's schedule for a specific date
+     */
+    @GetMapping("/stylist/{stylistId}/schedule")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getStylistSchedule(
+            @PathVariable String stylistId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date
+    ) {
+        try {
+            List<BookingResponse> response = bookingService.getStylistScheduleForDate(stylistId, date);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Bulk update booking status
+     */
+    @PostMapping("/bulk/status")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> bulkUpdateStatus(
+            @RequestBody BulkStatusUpdateRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String userId = authentication.getName();
+            List<BookingResponse> response = bookingService.bulkUpdateBookingStatus(request.getBookingIds(), request.getStatus(), userId);
+            return ResponseEntity.ok(ApiResponse.success(response, "Bulk status update completed"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * Get booking analytics
+     */
+    @GetMapping("/analytics")
+    public ResponseEntity<ApiResponse<BookingAnalytics>> getBookingAnalytics(
+            @RequestParam(required = false) String stylistId,
+            @RequestParam(defaultValue = "30") int days
+    ) {
+        try {
+            LocalDateTime endDate = LocalDateTime.now();
+            LocalDateTime startDate = endDate.minusDays(days);
+            BookingAnalytics analytics = bookingService.getBookingAnalytics(stylistId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success(analytics));
         } catch (Exception e) {
             return ResponseEntity
                     .status(400)

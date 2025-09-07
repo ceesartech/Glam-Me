@@ -29,10 +29,8 @@ public class PaymentService {
     public String createCheckoutSession(String bookingId) throws StripeException {
         log.info("Creating checkout session for booking: {}", bookingId);
 
-        Booking booking = bookingRepository.findByBookingId(bookingId);
-        if (booking == null) {
-            throw new RuntimeException("Booking not found: " + bookingId);
-        }
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
 
         // Convert price to cents
         long amount = booking.getPrice().multiply(new java.math.BigDecimal(100)).longValue();
@@ -74,10 +72,8 @@ public class PaymentService {
     public void processPaymentSuccess(String bookingId, String paymentIntentId) {
         log.info("Processing payment success for booking: {} with payment intent: {}", bookingId, paymentIntentId);
 
-        Booking booking = bookingRepository.findByBookingId(bookingId);
-        if (booking == null) {
-            throw new RuntimeException("Booking not found: " + bookingId);
-        }
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
 
         booking.setPaymentIntentId(paymentIntentId);
         booking.setPaymentStatus(Booking.PaymentStatus.CAPTURED);
@@ -92,10 +88,8 @@ public class PaymentService {
     public void processPaymentFailure(String bookingId) {
         log.info("Processing payment failure for booking: {}", bookingId);
 
-        Booking booking = bookingRepository.findByBookingId(bookingId);
-        if (booking == null) {
-            throw new RuntimeException("Booking not found: " + bookingId);
-        }
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
 
         booking.setPaymentStatus(Booking.PaymentStatus.FAILED);
         bookingRepository.save(booking);
@@ -109,10 +103,8 @@ public class PaymentService {
     public String createRefund(String bookingId) throws StripeException {
         log.info("Creating refund for booking: {}", bookingId);
 
-        Booking booking = bookingRepository.findByBookingId(bookingId);
-        if (booking == null) {
-            throw new RuntimeException("Booking not found: " + bookingId);
-        }
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
 
         if (booking.getPaymentIntentId() == null) {
             throw new RuntimeException("No payment found for booking: " + bookingId);
