@@ -19,30 +19,45 @@ repositories {
 dependencies {
     implementation project(':common')
 
-    // Web & JPA
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'   // WebClient
-    implementation 'org.springframework.boot:spring-boot-starter-websocket' // STOMP
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
-
-    // Stripe
-    implementation "com.stripe:stripe-java:29.0.0"
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Lombok annotations
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-    // WebClient for external API calls
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Jakarta
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
-    // PostgreSQL
+    // Jackson datatype for JSON serialization of nested DTOs
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+
+    // PostgreSQL driver
     runtimeOnly 'org.postgresql:postgresql:42.7.2'
 
+    // AWS SDK v2 for Ride Services
+    implementation 'software.amazon.awssdk:sqs:2.20.162'
+    implementation 'software.amazon.awssdk:eventbridge:2.20.162'
+    implementation 'software.amazon.awssdk:secretsmanager:2.20.162'
+    implementation 'software.amazon.awssdk:location:2.20.162'  // For geolocation services
+    implementation 'software.amazon.awssdk:connect:2.20.162'   // For real-time communication
+    implementation 'software.amazon.awssdk:iot:2.20.162'       // For IoT device management (optional)
+
+    // HTTP client for external APIs (Uber/Lyft) - already included above
+
+    // Stripe SDK (keeping for payment processing)
+    implementation "com.stripe:stripe-java:29.0.0"
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core:5.2.0'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 }
 
 tasks.test {

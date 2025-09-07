@@ -28,9 +28,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-    // AWS S3
-    implementation 'software.amazon.awssdk:s3:2.20.35'
-    implementation 'software.amazon.awssdk:auth:2.20.35'
+    // AWS SDK v2
+    implementation 'software.amazon.awssdk:s3:2.20.162'
+    implementation 'software.amazon.awssdk:auth:2.20.162'
+    implementation 'software.amazon.awssdk:eventbridge:2.20.162'
+    implementation 'software.amazon.awssdk:secretsmanager:2.20.162'
+    implementation 'software.amazon.awssdk:sqs:2.20.162'
+    implementation 'software.amazon.awssdk:ses:2.20.162'
 
     // Stripe
     implementation "com.stripe:stripe-java:29.0.0"
@@ -42,8 +46,6 @@ dependencies {
     // PostgreSQL
     runtimeOnly 'org.postgresql:postgresql:42.7.2'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core:5.2.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core:5.2.0'
 }

@@ -35,9 +35,8 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core:5.2.0'
-    testImplementation 'org.mockito:mockito-core:latest.release'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // If using JUnit 5
-    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release' // For JUnit 5 and Mockito annotations
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 }
 
 tasks.test {
