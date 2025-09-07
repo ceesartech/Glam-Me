@@ -20,8 +20,8 @@ public class ServiceOffering {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "stylist_profile_id", nullable = false)
-    private StylistProfile stylistProfile;
+    @JoinColumn(name = "stylist_id", nullable = false)
+    private Stylist stylist;
 
     @Column(nullable = false)
     private String styleName;
@@ -37,5 +37,6 @@ public class ServiceOffering {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<AddOn> addOns = new ArrayList<>();
 }
