@@ -6,7 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tech.ceesar.glamme.booking.dto.*;
+import tech.ceesar.glamme.booking.entity.Booking;
 import tech.ceesar.glamme.booking.service.BookingService;
+import tech.ceesar.glamme.booking.service.PaymentService;
+import tech.ceesar.glamme.booking.service.GoogleCalendarService;
 import tech.ceesar.glamme.common.dto.ApiResponse;
 
 import java.time.LocalDateTime;
@@ -17,9 +20,13 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final PaymentService paymentService;
+    private final GoogleCalendarService googleCalendarService;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, PaymentService paymentService, GoogleCalendarService googleCalendarService) {
         this.bookingService = bookingService;
+        this.paymentService = paymentService;
+        this.googleCalendarService = googleCalendarService;
     }
 
     @PostMapping
@@ -304,10 +311,180 @@ public class BookingController {
     }
 
     /**
+     * Create Stripe checkout session for booking payment
+     */
+    @PostMapping("/{bookingId}/payment/checkout")
+    public ResponseEntity<ApiResponse<String>> createCheckoutSession(@PathVariable String bookingId) {
+        try {
+            String checkoutUrl = paymentService.createCheckoutSession(bookingId);
+            return ResponseEntity.ok(ApiResponse.success(checkoutUrl, "Checkout session created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to create checkout session: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Process successful payment webhook
+     */
+    @PostMapping("/{bookingId}/payment/success")
+    public ResponseEntity<ApiResponse<String>> processPaymentSuccess(
+            @PathVariable String bookingId,
+            @RequestParam String paymentIntentId) {
+        try {
+            paymentService.processPaymentSuccess(bookingId, paymentIntentId);
+            return ResponseEntity.ok(ApiResponse.success("Payment processed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to process payment: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Process failed payment
+     */
+    @PostMapping("/{bookingId}/payment/failure")
+    public ResponseEntity<ApiResponse<String>> processPaymentFailure(@PathVariable String bookingId) {
+        try {
+            paymentService.processPaymentFailure(bookingId);
+            return ResponseEntity.ok(ApiResponse.success("Payment failure processed"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to process payment failure: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Create refund for booking
+     */
+    @PostMapping("/{bookingId}/refund")
+    public ResponseEntity<ApiResponse<String>> createRefund(@PathVariable String bookingId) {
+        try {
+            String refundId = paymentService.createRefund(bookingId);
+            return ResponseEntity.ok(ApiResponse.success(refundId, "Refund processed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to process refund: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Sync booking with Google Calendar
+     */
+    @PostMapping("/{bookingId}/calendar/sync")
+    public ResponseEntity<ApiResponse<String>> syncWithCalendar(@PathVariable String bookingId) {
+        try {
+            BookingResponse booking = bookingService.getBookingById(bookingId);
+            if (booking == null) {
+                return ResponseEntity
+                        .status(404)
+                        .body(ApiResponse.error("Booking not found"));
+            }
+
+            // Create a booking entity from the response for calendar sync
+            Booking bookingEntity = new Booking();
+            bookingEntity.setBookingId(booking.getBookingId());
+            bookingEntity.setServiceName(booking.getServiceName());
+            bookingEntity.setServiceDescription(booking.getServiceDescription());
+            bookingEntity.setAppointmentDate(booking.getAppointmentDate());
+            bookingEntity.setDurationMinutes(booking.getDurationMinutes());
+            bookingEntity.setLocationAddress(booking.getLocationAddress());
+            bookingEntity.setCustomerId(booking.getCustomerId());
+
+            String eventId = googleCalendarService.createEvent(bookingEntity);
+            if (eventId != null) {
+                return ResponseEntity.ok(ApiResponse.success(eventId, "Calendar event created successfully"));
+            } else {
+                return ResponseEntity
+                        .status(500)
+                        .body(ApiResponse.error("Failed to create calendar event"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to sync with calendar: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Update calendar event for booking
+     */
+    @PutMapping("/{bookingId}/calendar/update")
+    public ResponseEntity<ApiResponse<String>> updateCalendarEvent(@PathVariable String bookingId) {
+        try {
+            BookingResponse booking = bookingService.getBookingById(bookingId);
+            if (booking == null) {
+                return ResponseEntity
+                        .status(404)
+                        .body(ApiResponse.error("Booking not found"));
+            }
+
+            Booking bookingEntity = new Booking();
+            bookingEntity.setBookingId(booking.getBookingId());
+            bookingEntity.setServiceName(booking.getServiceName());
+            bookingEntity.setServiceDescription(booking.getServiceDescription());
+            bookingEntity.setAppointmentDate(booking.getAppointmentDate());
+            bookingEntity.setDurationMinutes(booking.getDurationMinutes());
+            bookingEntity.setLocationAddress(booking.getLocationAddress());
+            bookingEntity.setCustomerId(booking.getCustomerId());
+            bookingEntity.setCalendarEventId(booking.getCalendarEventId());
+
+            String eventId = googleCalendarService.updateEvent(bookingEntity);
+            if (eventId != null) {
+                return ResponseEntity.ok(ApiResponse.success(eventId, "Calendar event updated successfully"));
+            } else {
+                return ResponseEntity
+                        .status(500)
+                        .body(ApiResponse.error("Failed to update calendar event"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to update calendar event: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Delete calendar event for booking
+     */
+    @DeleteMapping("/{bookingId}/calendar")
+    public ResponseEntity<ApiResponse<String>> deleteCalendarEvent(@PathVariable String bookingId) {
+        try {
+            BookingResponse booking = bookingService.getBookingById(bookingId);
+            if (booking == null) {
+                return ResponseEntity
+                        .status(404)
+                        .body(ApiResponse.error("Booking not found"));
+            }
+
+            if (booking.getCalendarEventId() == null) {
+                return ResponseEntity
+                        .status(400)
+                        .body(ApiResponse.error("No calendar event found for this booking"));
+            }
+
+            Booking bookingEntity = new Booking();
+            bookingEntity.setBookingId(booking.getBookingId());
+            bookingEntity.setCalendarEventId(booking.getCalendarEventId());
+
+            googleCalendarService.deleteEvent(bookingEntity);
+            return ResponseEntity.ok(ApiResponse.success("Calendar event deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error("Failed to delete calendar event: " + e.getMessage()));
+        }
+    }
+
+    /**
      * Health check endpoint
      */
     @GetMapping("/health")
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Booking service is operational with complete functionality");
+        return ResponseEntity.ok("Booking service is operational with complete functionality, payment integration, and calendar sync");
     }
 }

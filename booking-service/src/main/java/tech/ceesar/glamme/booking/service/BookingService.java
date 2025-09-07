@@ -380,6 +380,15 @@ public class BookingService {
     }
 
     /**
+     * Get booking by ID
+     */
+    public BookingResponse getBookingById(String bookingId) {
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElse(null);
+        return booking != null ? mapToBookingResponse(booking) : null;
+    }
+
+    /**
      * Validate status transition
      */
     private boolean isValidStatusTransition(Booking.Status currentStatus, Booking.Status newStatus) {
