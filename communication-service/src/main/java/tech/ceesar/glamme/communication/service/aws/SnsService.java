@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.*;
+import tech.ceesar.glamme.communication.dto.BulkSmsResponse;
+import tech.ceesar.glamme.communication.dto.SmsResponse;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -41,7 +46,7 @@ public class SnsService {
 
             return SmsResponse.builder()
                     .messageId(response.messageId())
-                    .phoneNumber(phoneNumber)
+                    .timestamp(Instant.now())
                     .status("SENT")
                     .build();
 
@@ -54,22 +59,27 @@ public class SnsService {
     /**
      * Send SMS to multiple recipients
      */
-    public BulkSmsResponse sendBulkSms(String[] phoneNumbers, String message) {
-        BulkSmsResponse.BulkSmsResponseBuilder responseBuilder = BulkSmsResponse.builder();
+    public BulkSmsResponse sendBulkSms(List<String> phoneNumbers, String message) {
+        List<BulkSmsResponse.Success> successes = new ArrayList<>();
+        List<BulkSmsResponse.Failure> failures = new ArrayList<>();
 
         for (String phoneNumber : phoneNumbers) {
             try {
                 SmsResponse smsResponse = sendSms(phoneNumber, message);
-                responseBuilder.success(smsResponse);
+                successes.add(BulkSmsResponse.Success.builder()
+                        .messageId(smsResponse.getMessageId())
+                        .build());
             } catch (Exception e) {
-                responseBuilder.failure(BulkSmsResponse.Failure.builder()
-                        .phoneNumber(phoneNumber)
+                failures.add(BulkSmsResponse.Failure.builder()
                         .error(e.getMessage())
                         .build());
             }
         }
 
-        return responseBuilder.build();
+        return BulkSmsResponse.builder()
+                .success(successes)
+                .failure(failures)
+                .build();
     }
 
     /**
@@ -188,7 +198,7 @@ public class SnsService {
 
             return SmsResponse.builder()
                     .messageId(response.messageId())
-                    .phoneNumber(phoneNumber)
+                    .timestamp(Instant.now())
                     .status("SENT")
                     .build();
 
@@ -198,34 +208,4 @@ public class SnsService {
         }
     }
 
-    // Response DTOs
-    public record SmsResponse(String messageId, String phoneNumber, String status) {}
-
-    public record BulkSmsResponse(java.util.List<SmsResponse> successes,
-                                java.util.List<Failure> failures) {
-        public static BulkSmsResponseBuilder builder() {
-            return new BulkSmsResponseBuilder();
-        }
-
-        public static class BulkSmsResponseBuilder {
-            private final java.util.List<SmsResponse> successes = new java.util.ArrayList<>();
-            private final java.util.List<Failure> failures = new java.util.ArrayList<>();
-
-            public BulkSmsResponseBuilder success(SmsResponse response) {
-                this.successes.add(response);
-                return this;
-            }
-
-            public BulkSmsResponseBuilder failure(Failure failure) {
-                this.failures.add(failure);
-                return this;
-            }
-
-            public BulkSmsResponse build() {
-                return new BulkSmsResponse(successes, failures);
-            }
-        }
-
-        public record Failure(String phoneNumber, String error) {}
-    }
 }

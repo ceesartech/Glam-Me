@@ -4,13 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.ceesar.glamme.communication.dto.CallRequest;
-import tech.ceesar.glamme.communication.dto.CallResponse;
-import tech.ceesar.glamme.communication.dto.SendSmsRequest;
-import tech.ceesar.glamme.communication.dto.SendSmsResponse;
-import tech.ceesar.glamme.communication.dto.PushResponse;
-import tech.ceesar.glamme.communication.dto.EmailResponse;
-import tech.ceesar.glamme.communication.dto.BulkSmsResponse;
+import tech.ceesar.glamme.communication.dto.*;
 import tech.ceesar.glamme.communication.service.CommunicationService;
 import tech.ceesar.glamme.communication.service.aws.PinpointService;
 
@@ -42,8 +36,7 @@ public class CommunicationController {
      */
     @PostMapping("/push")
     public ResponseEntity<PushResponse> sendPushNotification(@RequestBody PushRequest req) {
-        PushResponse response = communicationService.sendPushNotification(
-                req.deviceToken(), req.title(), req.body());
+        PushResponse response = communicationService.sendPushNotification(req);
         return ResponseEntity.ok(response);
     }
 
@@ -52,7 +45,7 @@ public class CommunicationController {
      */
     @PostMapping("/email")
     public ResponseEntity<EmailResponse> sendEmail(@RequestBody EmailRequest req) {
-        EmailResponse response = communicationService.sendEmail(req.toAddress(), req.subject(), req.body());
+        EmailResponse response = communicationService.sendEmail(req);
         return ResponseEntity.ok(response);
     }
 
@@ -70,7 +63,70 @@ public class CommunicationController {
      */
     @PostMapping("/sms/bulk")
     public ResponseEntity<BulkSmsResponse> sendBulkSms(@RequestBody BulkSmsRequest req) {
-        BulkSmsResponse response = pinpointService.sendBulkSms(req.phoneNumbers(), req.message());
+        BulkSmsResponse response = pinpointService.sendBulkSms(req.getPhoneNumbers(), req.getMessage());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Send bulk email
+     */
+    @PostMapping("/email/bulk")
+    public ResponseEntity<BulkEmailResponse> sendBulkEmail(@RequestBody BulkEmailRequest req) {
+        BulkEmailResponse response = communicationService.sendBulkEmail(req);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get SMS statistics
+     */
+    @GetMapping("/stats/sms")
+    public ResponseEntity<SmsStats> getSmsStats() {
+        SmsStats stats = communicationService.getSmsStats();
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * Get email statistics
+     */
+    @GetMapping("/stats/email")
+    public ResponseEntity<EmailStats> getEmailStats() {
+        EmailStats stats = communicationService.getEmailStats();
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * Create video meeting
+     */
+    @PostMapping("/meeting")
+    public ResponseEntity<MeetingResponse> createMeeting(@RequestBody MeetingDetails details) {
+        MeetingResponse response = communicationService.createMeeting(details);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Join video meeting
+     */
+    @PostMapping("/meeting/{meetingId}/join")
+    public ResponseEntity<MeetingResponse> joinMeeting(@PathVariable String meetingId, @RequestBody AttendeeInfo attendee) {
+        MeetingResponse response = communicationService.joinMeeting(meetingId, attendee);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get attendee information
+     */
+    @GetMapping("/meeting/{meetingId}/attendee/{attendeeId}")
+    public ResponseEntity<AttendeeResponse> getAttendeeInfo(@PathVariable String meetingId, @PathVariable String attendeeId) {
+        AttendeeResponse response = communicationService.getAttendeeInfo(meetingId, attendeeId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * End call/meeting
+     */
+    @PostMapping("/call/{callId}/end")
+    public ResponseEntity<CallResponse> endCall(@PathVariable String callId) {
+        CallResponse response = communicationService.endCall(callId);
         return ResponseEntity.ok(response);
     }
 
@@ -79,11 +135,7 @@ public class CommunicationController {
      */
     @GetMapping("/health")
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Communication service is operational with AWS integration");
+        return ResponseEntity.ok(communicationService.getHealthStatus());
     }
 }
 
-// Simple request DTOs for the controller
-record PushRequest(String deviceToken, String title, String body) {}
-record EmailRequest(String toAddress, String subject, String body) {}
-record BulkSmsRequest(java.util.List<String> phoneNumbers, String message) {}

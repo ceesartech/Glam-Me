@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.*;
+import tech.ceesar.glamme.communication.dto.EmailResponse;
+import tech.ceesar.glamme.communication.dto.EmailStats;
+import tech.ceesar.glamme.communication.dto.BulkEmailResponse;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +28,24 @@ public class SesService {
      * Send simple text email
      */
     public EmailResponse sendEmail(String toAddress, String subject, String body) {
+        return sendEmail(toAddress, subject, body, null);
+    }
+
+    /**
+     * Send email with optional HTML body
+     */
+    public EmailResponse sendEmail(String toAddress, String subject, String body, String htmlBody) {
+        if (htmlBody != null && !htmlBody.trim().isEmpty()) {
+            return sendHtmlEmail(toAddress, subject, htmlBody, body);
+        } else {
+            return sendTextEmail(toAddress, subject, body);
+        }
+    }
+
+    /**
+     * Send text email
+     */
+    private EmailResponse sendTextEmail(String toAddress, String subject, String body) {
         try {
             SendEmailRequest request = SendEmailRequest.builder()
                     .source(fromEmail)
@@ -44,16 +66,16 @@ public class SesService {
 
             SendEmailResponse response = sesClient.sendEmail(request);
 
-            log.info("Sent email to {}: messageId={}", toAddress, response.messageId());
+            log.info("Sent text email to {}: messageId={}", toAddress, response.messageId());
 
             return EmailResponse.builder()
                     .messageId(response.messageId())
-                    .toAddress(toAddress)
-                    .status("SENT")
+                    .timestamp(Instant.now())
+                    .successfulRecipients(List.of(toAddress))
                     .build();
 
         } catch (Exception e) {
-            log.error("Failed to send email to {}", toAddress, e);
+            log.error("Failed to send text email to {}", toAddress, e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
@@ -91,8 +113,8 @@ public class SesService {
 
             return EmailResponse.builder()
                     .messageId(response.messageId())
-                    .toAddress(toAddress)
-                    .status("SENT")
+                    .timestamp(Instant.now())
+                    .successfulRecipients(List.of(toAddress))
                     .build();
 
         } catch (Exception e) {
@@ -105,21 +127,29 @@ public class SesService {
      * Send email to multiple recipients
      */
     public BulkEmailResponse sendBulkEmail(List<String> toAddresses, String subject, String body) {
-        BulkEmailResponse.BulkEmailResponseBuilder responseBuilder = BulkEmailResponse.builder();
+        List<BulkEmailResponse.Success> successes = new java.util.ArrayList<>();
+        List<BulkEmailResponse.Failure> failures = new java.util.ArrayList<>();
 
         for (String toAddress : toAddresses) {
             try {
                 EmailResponse emailResponse = sendEmail(toAddress, subject, body);
-                responseBuilder.success(emailResponse);
+                successes.add(BulkEmailResponse.Success.builder()
+                        .messageId(emailResponse.getMessageId())
+                        .email(toAddress)
+                        .build());
             } catch (Exception e) {
-                responseBuilder.failure(BulkEmailResponse.Failure.builder()
+                failures.add(BulkEmailResponse.Failure.builder()
                         .email(toAddress)
                         .error(e.getMessage())
+                        .errorCode("SEND_FAILED")
                         .build());
             }
         }
 
-        return responseBuilder.build();
+        return BulkEmailResponse.builder()
+                .success(successes)
+                .failure(failures)
+                .build();
     }
 
     /**
@@ -146,8 +176,8 @@ public class SesService {
 
             return EmailResponse.builder()
                     .messageId(response.messageId())
-                    .toAddress(toAddress)
-                    .status("SENT")
+                    .timestamp(Instant.now())
+                    .successfulRecipients(List.of(toAddress))
                     .build();
 
         } catch (Exception e) {
@@ -186,7 +216,7 @@ public class SesService {
 
             GetIdentityVerificationAttributesResponse response = sesClient.getIdentityVerificationAttributes(request);
 
-            VerificationAttributes attributes = response.verificationAttributes().get(emailAddress);
+            var attributes = response.verificationAttributes().get(emailAddress);
             return attributes != null && "Success".equals(attributes.verificationStatus().toString());
 
         } catch (Exception e) {
@@ -289,10 +319,11 @@ public class SesService {
 
             return EmailStats.builder()
                     .totalSent(totalSent)
-                    .bounces(bounces)
-                    .complaints(complaints)
-                    .rejects(rejects)
+                    .totalBounced(bounces)
+                    .totalComplained(complaints)
                     .deliveryRate(totalSent > 0 ? ((double) (totalSent - bounces - rejects) / totalSent) * 100 : 0)
+                    .bounceRate(totalSent > 0 ? ((double) bounces / totalSent) * 100 : 0)
+                    .complaintRate(totalSent > 0 ? ((double) complaints / totalSent) * 100 : 0)
                     .build();
 
         } catch (Exception e) {
@@ -301,38 +332,6 @@ public class SesService {
         }
     }
 
-    // Helper method - need to import ObjectMapper
+    // Helper method for JSON serialization
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-
-    // Response DTOs
-    public record EmailResponse(String messageId, String toAddress, String status) {}
-
-    public record EmailStats(Long totalSent, Long bounces, Long complaints, Long rejects, Double deliveryRate) {}
-
-    public record BulkEmailResponse(List<EmailResponse> successes, List<Failure> failures) {
-        public static BulkEmailResponseBuilder builder() {
-            return new BulkEmailResponseBuilder();
-        }
-
-        public static class BulkEmailResponseBuilder {
-            private final List<EmailResponse> successes = new java.util.ArrayList<>();
-            private final List<Failure> failures = new java.util.ArrayList<>();
-
-            public BulkEmailResponseBuilder success(EmailResponse response) {
-                this.successes.add(response);
-                return this;
-            }
-
-            public BulkEmailResponseBuilder failure(Failure failure) {
-                this.failures.add(failure);
-                return this;
-            }
-
-            public BulkEmailResponse build() {
-                return new BulkEmailResponse(successes, failures);
-            }
-        }
-
-        public record Failure(String email, String error) {}
-    }
 }
