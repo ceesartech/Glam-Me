@@ -1,0 +1,4074 @@
+{
+ "Resources": {
+  "GlammeVpc9C24534F": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/Resource"
+   }
+  },
+  "GlammeVpcPublicSubnet1Subnet28265697": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/Subnet"
+   }
+  },
+  "GlammeVpcPublicSubnet1RouteTable1300AFFC": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "GlammeVpcPublicSubnet1RouteTableAssociation45D6B22B": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "GlammeVpcPublicSubnet1RouteTable1300AFFC"
+    },
+    "SubnetId": {
+     "Ref": "GlammeVpcPublicSubnet1Subnet28265697"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "GlammeVpcPublicSubnet1DefaultRoute9EFF4B9E": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "GlammeVpcIGW9DF9AC2F"
+    },
+    "RouteTableId": {
+     "Ref": "GlammeVpcPublicSubnet1RouteTable1300AFFC"
+    }
+   },
+   "DependsOn": [
+    "GlammeVpcVPCGW80E6C66B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "GlammeVpcPublicSubnet1EIPDF7FD687": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/EIP"
+   }
+  },
+  "GlammeVpcPublicSubnet1NATGatewayC6F7E748": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "GlammeVpcPublicSubnet1EIPDF7FD687",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "GlammeVpcPublicSubnet1Subnet28265697"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "GlammeVpcPublicSubnet1DefaultRoute9EFF4B9E",
+    "GlammeVpcPublicSubnet1RouteTableAssociation45D6B22B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet1/NATGateway"
+   }
+  },
+  "GlammeVpcPublicSubnet2Subnet6EAF8CCF": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.64.0/18",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet2/Subnet"
+   }
+  },
+  "GlammeVpcPublicSubnet2RouteTableB1CA0CEC": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "GlammeVpcPublicSubnet2RouteTableAssociation3FAAB290": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "GlammeVpcPublicSubnet2RouteTableB1CA0CEC"
+    },
+    "SubnetId": {
+     "Ref": "GlammeVpcPublicSubnet2Subnet6EAF8CCF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "GlammeVpcPublicSubnet2DefaultRouteDEAB0D12": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "GlammeVpcIGW9DF9AC2F"
+    },
+    "RouteTableId": {
+     "Ref": "GlammeVpcPublicSubnet2RouteTableB1CA0CEC"
+    }
+   },
+   "DependsOn": [
+    "GlammeVpcVPCGW80E6C66B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "GlammeVpcPrivateSubnet1Subnet6B6A0479": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.128.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet1/Subnet"
+   }
+  },
+  "GlammeVpcPrivateSubnet1RouteTable7FAA9C55": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet1/RouteTable"
+   }
+  },
+  "GlammeVpcPrivateSubnet1RouteTableAssociationD4B47520": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "GlammeVpcPrivateSubnet1RouteTable7FAA9C55"
+    },
+    "SubnetId": {
+     "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "GlammeVpcPrivateSubnet1DefaultRoute3FFF09DD": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "GlammeVpcPublicSubnet1NATGatewayC6F7E748"
+    },
+    "RouteTableId": {
+     "Ref": "GlammeVpcPrivateSubnet1RouteTable7FAA9C55"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "GlammeVpcPrivateSubnet2Subnet5804D822": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.192.0/18",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet2/Subnet"
+   }
+  },
+  "GlammeVpcPrivateSubnet2RouteTable05E10C29": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet2/RouteTable"
+   }
+  },
+  "GlammeVpcPrivateSubnet2RouteTableAssociation886BCDD9": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "GlammeVpcPrivateSubnet2RouteTable05E10C29"
+    },
+    "SubnetId": {
+     "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "GlammeVpcPrivateSubnet2DefaultRoute33767F8E": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "GlammeVpcPublicSubnet1NATGatewayC6F7E748"
+    },
+    "RouteTableId": {
+     "Ref": "GlammeVpcPrivateSubnet2RouteTable05E10C29"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "GlammeVpcIGW9DF9AC2F": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "GlammeVpcStack/GlammeVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/IGW"
+   }
+  },
+  "GlammeVpcVPCGW80E6C66B": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "GlammeVpcIGW9DF9AC2F"
+    },
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/VPCGW"
+   }
+  },
+  "GlammeVpcRestrictDefaultSecurityGroupCustomResourceDA9A64E1": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "GlammeVpc9C24534F",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "476114151082"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeVpc/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:us-east-1:476114151082:security-group/",
+             {
+              "Fn::GetAtt": [
+               "GlammeVpc9C24534F",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-476114151082-us-east-1",
+     "S3Key": "dd5711540f04e06aa955d7f4862fc04e8cdea464cb590dae91ed2976bb78098e.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.dd5711540f04e06aa955d7f4862fc04e8cdea464cb590dae91ed2976bb78098e",
+    "aws:asset:property": "Code"
+   }
+  },
+  "GlammeClusterE73AFC45": {
+   "Type": "AWS::ECS::Cluster",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeCluster/Resource"
+   }
+  },
+  "DatabaseSecurityGroup7319C0F6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for database access",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/DatabaseSecurityGroup/Resource"
+   }
+  },
+  "AuroraDatabaseSubnets5EA8274A": {
+   "Type": "AWS::RDS::DBSubnetGroup",
+   "Properties": {
+    "DBSubnetGroupDescription": "Subnets for AuroraDatabase database",
+    "SubnetIds": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Subnets/Default"
+   }
+  },
+  "GlammeVpcStackAuroraDatabaseSecretA6CF8DCF3fdaad7efa858a3daf9490cf0a702aeb": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Generated by the CDK for stack: ",
+       {
+        "Ref": "AWS::StackName"
+       }
+      ]
+     ]
+    },
+    "GenerateSecretString": {
+     "ExcludeCharacters": " %+~`#$&*()|[]{}:;<>?!'/@\"\\",
+     "GenerateStringKey": "password",
+     "PasswordLength": 30,
+     "SecretStringTemplate": "{\"username\":\"glamme_admin\"}"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Secret/Resource"
+   }
+  },
+  "AuroraDatabaseSecretAttachment76FF7930": {
+   "Type": "AWS::SecretsManager::SecretTargetAttachment",
+   "Properties": {
+    "SecretId": {
+     "Ref": "GlammeVpcStackAuroraDatabaseSecretA6CF8DCF3fdaad7efa858a3daf9490cf0a702aeb"
+    },
+    "TargetId": {
+     "Ref": "AuroraDatabase5475D328"
+    },
+    "TargetType": "AWS::RDS::DBCluster"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Secret/Attachment/Resource"
+   }
+  },
+  "AuroraDatabase5475D328": {
+   "Type": "AWS::RDS::DBCluster",
+   "Properties": {
+    "BackupRetentionPeriod": 7,
+    "CopyTagsToSnapshot": true,
+    "DBClusterParameterGroupName": "default.aurora-postgresql15",
+    "DBSubnetGroupName": {
+     "Ref": "AuroraDatabaseSubnets5EA8274A"
+    },
+    "Engine": "aurora-postgresql",
+    "EngineVersion": "15.4",
+    "MasterUserPassword": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "GlammeVpcStackAuroraDatabaseSecretA6CF8DCF3fdaad7efa858a3daf9490cf0a702aeb"
+       },
+       ":SecretString:password::}}"
+      ]
+     ]
+    },
+    "MasterUsername": "glamme_admin",
+    "Port": 5432,
+    "VpcSecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "DatabaseSecurityGroup7319C0F6",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Snapshot",
+   "DeletionPolicy": "Snapshot",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Resource"
+   }
+  },
+  "AuroraDatabaseInstance1CDE491B8": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "DBClusterIdentifier": {
+     "Ref": "AuroraDatabase5475D328"
+    },
+    "DBInstanceClass": "db.t3.medium",
+    "DBSubnetGroupName": {
+     "Ref": "AuroraDatabaseSubnets5EA8274A"
+    },
+    "Engine": "aurora-postgresql",
+    "PubliclyAccessible": false
+   },
+   "DependsOn": [
+    "GlammeVpcPrivateSubnet1DefaultRoute3FFF09DD",
+    "GlammeVpcPrivateSubnet1RouteTableAssociationD4B47520",
+    "GlammeVpcPrivateSubnet2DefaultRoute33767F8E",
+    "GlammeVpcPrivateSubnet2RouteTableAssociation886BCDD9"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Instance1"
+   }
+  },
+  "AuroraDatabaseInstance2D6A3C517": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "DBClusterIdentifier": {
+     "Ref": "AuroraDatabase5475D328"
+    },
+    "DBInstanceClass": "db.t3.medium",
+    "DBSubnetGroupName": {
+     "Ref": "AuroraDatabaseSubnets5EA8274A"
+    },
+    "Engine": "aurora-postgresql",
+    "PubliclyAccessible": false
+   },
+   "DependsOn": [
+    "GlammeVpcPrivateSubnet1DefaultRoute3FFF09DD",
+    "GlammeVpcPrivateSubnet1RouteTableAssociationD4B47520",
+    "GlammeVpcPrivateSubnet2DefaultRoute33767F8E",
+    "GlammeVpcPrivateSubnet2RouteTableAssociation886BCDD9"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuroraDatabase/Instance2"
+   }
+  },
+  "RedisSubnetGroup": {
+   "Type": "AWS::ElastiCache::SubnetGroup",
+   "Properties": {
+    "Description": "Subnet group for GlamMe Redis cluster",
+    "SubnetIds": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/RedisSubnetGroup"
+   }
+  },
+  "RedisCluster": {
+   "Type": "AWS::ElastiCache::CacheCluster",
+   "Properties": {
+    "CacheNodeType": "cache.t3.micro",
+    "CacheSubnetGroupName": {
+     "Ref": "RedisSubnetGroup"
+    },
+    "Engine": "redis",
+    "EngineVersion": "7.0",
+    "NumCacheNodes": 1,
+    "VpcSecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "DatabaseSecurityGroup7319C0F6",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/RedisCluster"
+   }
+  },
+  "OpenSearchDomain85D65221": {
+   "Type": "AWS::OpenSearchService::Domain",
+   "Properties": {
+    "ClusterConfig": {
+     "DedicatedMasterEnabled": false,
+     "InstanceCount": 1,
+     "InstanceType": "t3.small.search",
+     "ZoneAwarenessEnabled": false
+    },
+    "DomainEndpointOptions": {
+     "EnforceHTTPS": false,
+     "TLSSecurityPolicy": "Policy-Min-TLS-1-0-2019-07"
+    },
+    "EBSOptions": {
+     "EBSEnabled": true,
+     "VolumeSize": 20,
+     "VolumeType": "gp3"
+    },
+    "EncryptionAtRestOptions": {
+     "Enabled": false
+    },
+    "EngineVersion": "OpenSearch_2.11",
+    "LogPublishingOptions": {},
+    "NodeToNodeEncryptionOptions": {
+     "Enabled": false
+    },
+    "VPCOptions": {
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "DatabaseSecurityGroup7319C0F6",
+        "GroupId"
+       ]
+      }
+     ],
+     "SubnetIds": [
+      {
+       "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+      },
+      {
+       "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+      }
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/OpenSearchDomain/Resource"
+   }
+  },
+  "GlammeBucket15BBD74E": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeBucket/Resource"
+   }
+  },
+  "GlammeBucketPolicy3C2117DA": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "GlammeBucket15BBD74E"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "OAIE1EFC67F",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "GlammeBucket15BBD74E",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeBucket/Policy/Resource"
+   }
+  },
+  "GlammeUserPool2DA4AD20": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_phone_number",
+       "Priority": 1
+      },
+      {
+       "Name": "verified_email",
+       "Priority": 2
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "EmailVerificationMessage": "The verification code to your new account is {####}",
+    "EmailVerificationSubject": "Verify your new account",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 8,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireUppercase": true
+     }
+    },
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolName": "glamme-user-pool",
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "The verification code to your new account is {####}",
+     "EmailSubject": "Verify your new account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeUserPool/Resource"
+   }
+  },
+  "GlammeUserPoolClient2D76F3C4": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "implicit",
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "profile",
+     "phone",
+     "email",
+     "openid",
+     "aws.cognito.signin.user.admin"
+    ],
+    "CallbackURLs": [
+     "https://example.com"
+    ],
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "GlammeUserPool2DA4AD20"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeUserPoolClient/Resource"
+   }
+  },
+  "AuthServiceFargateLB1E170B51": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "AuthServiceFargateLBSecurityGroup52C383D9",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPublicSubnet1Subnet28265697"
+     },
+     {
+      "Ref": "GlammeVpcPublicSubnet2Subnet6EAF8CCF"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "GlammeVpcPublicSubnet1DefaultRoute9EFF4B9E",
+    "GlammeVpcPublicSubnet1RouteTableAssociation45D6B22B",
+    "GlammeVpcPublicSubnet2DefaultRouteDEAB0D12",
+    "GlammeVpcPublicSubnet2RouteTableAssociation3FAAB290"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/LB/Resource"
+   }
+  },
+  "AuthServiceFargateLBSecurityGroup52C383D9": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackAuthServiceFargateLBC405CA88",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "AuthServiceFargateLBSecurityGrouptoGlammeVpcStackAuthServiceFargateServiceSecurityGroup47BA8B1980801CB8C003": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateServiceSecurityGroup6DCD48FE",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateLBSecurityGroup52C383D9",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/LB/SecurityGroup/to GlammeVpcStackAuthServiceFargateServiceSecurityGroup47BA8B19:8080"
+   }
+  },
+  "AuthServiceFargateLBPublicListener4ADB90B1": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "AuthServiceFargateLBPublicListenerECSGroupB459051F"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "AuthServiceFargateLB1E170B51"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "AuthServiceFargateLBPublicListenerECSGroupB459051F": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "AuthServiceFargateTaskDefTaskRole28ED8301": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "AuthServiceFargateTaskDef5E1E4D30": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/auth-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "AuthServiceFargateTaskDefwebLogGroupDB2F0D08"
+        },
+        "awslogs-stream-prefix": "AuthServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateTaskDefExecutionRole89B32DDE",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackAuthServiceFargateTaskDef1E4C5354",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateTaskDefTaskRole28ED8301",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/TaskDef/Resource"
+   }
+  },
+  "AuthServiceFargateTaskDefwebLogGroupDB2F0D08": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "AuthServiceFargateTaskDefExecutionRole89B32DDE": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "AuthServiceFargateTaskDefExecutionRoleDefaultPolicy7BFD379E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/auth-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "AuthServiceFargateTaskDefwebLogGroupDB2F0D08",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AuthServiceFargateTaskDefExecutionRoleDefaultPolicy7BFD379E",
+    "Roles": [
+     {
+      "Ref": "AuthServiceFargateTaskDefExecutionRole89B32DDE"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "AuthServiceFargateService401835B7": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "AuthServiceFargateLBPublicListenerECSGroupB459051F"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "AuthServiceFargateServiceSecurityGroup6DCD48FE",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "AuthServiceFargateTaskDef5E1E4D30"
+    }
+   },
+   "DependsOn": [
+    "AuthServiceFargateLBPublicListenerECSGroupB459051F",
+    "AuthServiceFargateLBPublicListener4ADB90B1",
+    "AuthServiceFargateTaskDefTaskRole28ED8301"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/Service/Service"
+   }
+  },
+  "AuthServiceFargateServiceSecurityGroup6DCD48FE": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/AuthServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "AuthServiceFargateTaskDefTaskRole28ED8301"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "AuthServiceFargateServiceSecurityGroupfromGlammeVpcStackAuthServiceFargateLBSecurityGroupC4F244F880806116FECD": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateServiceSecurityGroup6DCD48FE",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "AuthServiceFargateLBSecurityGroup52C383D9",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "AuthServiceFargateTaskDefTaskRole28ED8301"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/AuthServiceFargate/Service/SecurityGroup/from GlammeVpcStackAuthServiceFargateLBSecurityGroupC4F244F8:8080"
+   }
+  },
+  "ImageServiceFargateLB89C7E4BA": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internal",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "ImageServiceFargateLBSecurityGroup7E05EA36",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/LB/Resource"
+   }
+  },
+  "ImageServiceFargateLBSecurityGroup7E05EA36": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackImageServiceFargateLB74BD13D6",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "ImageServiceFargateLBSecurityGrouptoGlammeVpcStackImageServiceFargateServiceSecurityGroup43CA9CFD8080D820CCDE": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateServiceSecurityGroupBB31E26E",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateLBSecurityGroup7E05EA36",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/LB/SecurityGroup/to GlammeVpcStackImageServiceFargateServiceSecurityGroup43CA9CFD:8080"
+   }
+  },
+  "ImageServiceFargateLBPublicListener425EC175": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "ImageServiceFargateLBPublicListenerECSGroup44D355BC"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "ImageServiceFargateLB89C7E4BA"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "ImageServiceFargateLBPublicListenerECSGroup44D355BC": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "ImageServiceFargateTaskDefTaskRoleFC7D1366": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "ImageServiceFargateTaskDef78EF4EEB": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/image-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ImageServiceFargateTaskDefwebLogGroup355A9EDF"
+        },
+        "awslogs-stream-prefix": "ImageServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateTaskDefExecutionRole561F02A4",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackImageServiceFargateTaskDefD96D1F9B",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateTaskDefTaskRoleFC7D1366",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/TaskDef/Resource"
+   }
+  },
+  "ImageServiceFargateTaskDefwebLogGroup355A9EDF": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "ImageServiceFargateTaskDefExecutionRole561F02A4": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "ImageServiceFargateTaskDefExecutionRoleDefaultPolicy237DF324": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/image-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ImageServiceFargateTaskDefwebLogGroup355A9EDF",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ImageServiceFargateTaskDefExecutionRoleDefaultPolicy237DF324",
+    "Roles": [
+     {
+      "Ref": "ImageServiceFargateTaskDefExecutionRole561F02A4"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ImageServiceFargateService8814E290": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "ImageServiceFargateLBPublicListenerECSGroup44D355BC"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ImageServiceFargateServiceSecurityGroupBB31E26E",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "ImageServiceFargateTaskDef78EF4EEB"
+    }
+   },
+   "DependsOn": [
+    "ImageServiceFargateLBPublicListenerECSGroup44D355BC",
+    "ImageServiceFargateLBPublicListener425EC175",
+    "ImageServiceFargateTaskDefTaskRoleFC7D1366"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/Service/Service"
+   }
+  },
+  "ImageServiceFargateServiceSecurityGroupBB31E26E": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/ImageServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "ImageServiceFargateTaskDefTaskRoleFC7D1366"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "ImageServiceFargateServiceSecurityGroupfromGlammeVpcStackImageServiceFargateLBSecurityGroupCC939321808094FCEBE4": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateServiceSecurityGroupBB31E26E",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ImageServiceFargateLBSecurityGroup7E05EA36",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "ImageServiceFargateTaskDefTaskRoleFC7D1366"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ImageServiceFargate/Service/SecurityGroup/from GlammeVpcStackImageServiceFargateLBSecurityGroupCC939321:8080"
+   }
+  },
+  "MatchingServiceFargateLB10F59BB0": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internal",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "MatchingServiceFargateLBSecurityGroup9CC53C91",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/LB/Resource"
+   }
+  },
+  "MatchingServiceFargateLBSecurityGroup9CC53C91": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackMatchingServiceFargateLB1139191E",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "MatchingServiceFargateLBSecurityGrouptoGlammeVpcStackMatchingServiceFargateServiceSecurityGroup3419D6008080F1DDAA5F": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateServiceSecurityGroupFD644353",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateLBSecurityGroup9CC53C91",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/LB/SecurityGroup/to GlammeVpcStackMatchingServiceFargateServiceSecurityGroup3419D600:8080"
+   }
+  },
+  "MatchingServiceFargateLBPublicListener7386804F": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "MatchingServiceFargateLBPublicListenerECSGroup62962216"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "MatchingServiceFargateLB10F59BB0"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "MatchingServiceFargateLBPublicListenerECSGroup62962216": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "MatchingServiceFargateTaskDefTaskRoleD75EC097": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "MatchingServiceFargateTaskDef47900B7C": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/matching-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "MatchingServiceFargateTaskDefwebLogGroupB94B6CD1"
+        },
+        "awslogs-stream-prefix": "MatchingServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateTaskDefExecutionRole0911AFDA",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackMatchingServiceFargateTaskDef2A11618A",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateTaskDefTaskRoleD75EC097",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/TaskDef/Resource"
+   }
+  },
+  "MatchingServiceFargateTaskDefwebLogGroupB94B6CD1": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "MatchingServiceFargateTaskDefExecutionRole0911AFDA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "MatchingServiceFargateTaskDefExecutionRoleDefaultPolicy3C7B72D2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/matching-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "MatchingServiceFargateTaskDefwebLogGroupB94B6CD1",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MatchingServiceFargateTaskDefExecutionRoleDefaultPolicy3C7B72D2",
+    "Roles": [
+     {
+      "Ref": "MatchingServiceFargateTaskDefExecutionRole0911AFDA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "MatchingServiceFargateService99C7A71C": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "MatchingServiceFargateLBPublicListenerECSGroup62962216"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "MatchingServiceFargateServiceSecurityGroupFD644353",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "MatchingServiceFargateTaskDef47900B7C"
+    }
+   },
+   "DependsOn": [
+    "MatchingServiceFargateLBPublicListenerECSGroup62962216",
+    "MatchingServiceFargateLBPublicListener7386804F",
+    "MatchingServiceFargateTaskDefTaskRoleD75EC097"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/Service/Service"
+   }
+  },
+  "MatchingServiceFargateServiceSecurityGroupFD644353": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/MatchingServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "MatchingServiceFargateTaskDefTaskRoleD75EC097"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "MatchingServiceFargateServiceSecurityGroupfromGlammeVpcStackMatchingServiceFargateLBSecurityGroup0F135B4C80809B55346B": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateServiceSecurityGroupFD644353",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "MatchingServiceFargateLBSecurityGroup9CC53C91",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "MatchingServiceFargateTaskDefTaskRoleD75EC097"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/MatchingServiceFargate/Service/SecurityGroup/from GlammeVpcStackMatchingServiceFargateLBSecurityGroup0F135B4C:8080"
+   }
+  },
+  "SocialServiceFargateLB3500EEEA": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internal",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "SocialServiceFargateLBSecurityGroup0C2DD957",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/LB/Resource"
+   }
+  },
+  "SocialServiceFargateLBSecurityGroup0C2DD957": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackSocialServiceFargateLBB121B4FC",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "SocialServiceFargateLBSecurityGrouptoGlammeVpcStackSocialServiceFargateServiceSecurityGroup91B4B30E80806DE27E5F": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateServiceSecurityGroupF818D9BD",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateLBSecurityGroup0C2DD957",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/LB/SecurityGroup/to GlammeVpcStackSocialServiceFargateServiceSecurityGroup91B4B30E:8080"
+   }
+  },
+  "SocialServiceFargateLBPublicListenerC0C88EB3": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "SocialServiceFargateLBPublicListenerECSGroup74C67DB5"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "SocialServiceFargateLB3500EEEA"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "SocialServiceFargateLBPublicListenerECSGroup74C67DB5": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "SocialServiceFargateTaskDefTaskRole1E810E79": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "SocialServiceFargateTaskDef2C5FB21D": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/social-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "SocialServiceFargateTaskDefwebLogGroup7E1CA288"
+        },
+        "awslogs-stream-prefix": "SocialServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateTaskDefExecutionRole55B26C82",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackSocialServiceFargateTaskDef46AA0402",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateTaskDefTaskRole1E810E79",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/TaskDef/Resource"
+   }
+  },
+  "SocialServiceFargateTaskDefwebLogGroup7E1CA288": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "SocialServiceFargateTaskDefExecutionRole55B26C82": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "SocialServiceFargateTaskDefExecutionRoleDefaultPolicyD89EF627": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/social-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "SocialServiceFargateTaskDefwebLogGroup7E1CA288",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SocialServiceFargateTaskDefExecutionRoleDefaultPolicyD89EF627",
+    "Roles": [
+     {
+      "Ref": "SocialServiceFargateTaskDefExecutionRole55B26C82"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "SocialServiceFargateServiceAF89B4A8": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "SocialServiceFargateLBPublicListenerECSGroup74C67DB5"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "SocialServiceFargateServiceSecurityGroupF818D9BD",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "SocialServiceFargateTaskDef2C5FB21D"
+    }
+   },
+   "DependsOn": [
+    "SocialServiceFargateLBPublicListenerECSGroup74C67DB5",
+    "SocialServiceFargateLBPublicListenerC0C88EB3",
+    "SocialServiceFargateTaskDefTaskRole1E810E79"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/Service/Service"
+   }
+  },
+  "SocialServiceFargateServiceSecurityGroupF818D9BD": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/SocialServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "SocialServiceFargateTaskDefTaskRole1E810E79"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "SocialServiceFargateServiceSecurityGroupfromGlammeVpcStackSocialServiceFargateLBSecurityGroupCAF753D48080533B1B21": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateServiceSecurityGroupF818D9BD",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "SocialServiceFargateLBSecurityGroup0C2DD957",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "SocialServiceFargateTaskDefTaskRole1E810E79"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/SocialServiceFargate/Service/SecurityGroup/from GlammeVpcStackSocialServiceFargateLBSecurityGroupCAF753D4:8080"
+   }
+  },
+  "ShoppingServiceFargateLB5E9E5077": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internal",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "ShoppingServiceFargateLBSecurityGroup6B439F39",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/LB/Resource"
+   }
+  },
+  "ShoppingServiceFargateLBSecurityGroup6B439F39": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackShoppingServiceFargateLB4A755CE0",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "ShoppingServiceFargateLBSecurityGrouptoGlammeVpcStackShoppingServiceFargateServiceSecurityGroupC01433D080800803EC63": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateServiceSecurityGroup19C48961",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateLBSecurityGroup6B439F39",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/LB/SecurityGroup/to GlammeVpcStackShoppingServiceFargateServiceSecurityGroupC01433D0:8080"
+   }
+  },
+  "ShoppingServiceFargateLBPublicListenerDC4FAD2A": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "ShoppingServiceFargateLBPublicListenerECSGroupBD41A4E0"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "ShoppingServiceFargateLB5E9E5077"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "ShoppingServiceFargateLBPublicListenerECSGroupBD41A4E0": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "ShoppingServiceFargateTaskDefTaskRole25744088": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "ShoppingServiceFargateTaskDefBD793267": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/shopping-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ShoppingServiceFargateTaskDefwebLogGroup71BC5CF9"
+        },
+        "awslogs-stream-prefix": "ShoppingServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateTaskDefExecutionRole50F2CE48",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackShoppingServiceFargateTaskDefCE94B847",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateTaskDefTaskRole25744088",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/TaskDef/Resource"
+   }
+  },
+  "ShoppingServiceFargateTaskDefwebLogGroup71BC5CF9": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "ShoppingServiceFargateTaskDefExecutionRole50F2CE48": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "ShoppingServiceFargateTaskDefExecutionRoleDefaultPolicy655A9403": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/shopping-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ShoppingServiceFargateTaskDefwebLogGroup71BC5CF9",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ShoppingServiceFargateTaskDefExecutionRoleDefaultPolicy655A9403",
+    "Roles": [
+     {
+      "Ref": "ShoppingServiceFargateTaskDefExecutionRole50F2CE48"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ShoppingServiceFargateService297793E9": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "ShoppingServiceFargateLBPublicListenerECSGroupBD41A4E0"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ShoppingServiceFargateServiceSecurityGroup19C48961",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "ShoppingServiceFargateTaskDefBD793267"
+    }
+   },
+   "DependsOn": [
+    "ShoppingServiceFargateLBPublicListenerECSGroupBD41A4E0",
+    "ShoppingServiceFargateLBPublicListenerDC4FAD2A",
+    "ShoppingServiceFargateTaskDefTaskRole25744088"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/Service/Service"
+   }
+  },
+  "ShoppingServiceFargateServiceSecurityGroup19C48961": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/ShoppingServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "ShoppingServiceFargateTaskDefTaskRole25744088"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "ShoppingServiceFargateServiceSecurityGroupfromGlammeVpcStackShoppingServiceFargateLBSecurityGroup411441398080B084546E": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateServiceSecurityGroup19C48961",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ShoppingServiceFargateLBSecurityGroup6B439F39",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "ShoppingServiceFargateTaskDefTaskRole25744088"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/ShoppingServiceFargate/Service/SecurityGroup/from GlammeVpcStackShoppingServiceFargateLBSecurityGroup41144139:8080"
+   }
+  },
+  "CommunicationServiceFargateLBC5339D62": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internal",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "CommunicationServiceFargateLBSecurityGroupCDD704DA",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+     },
+     {
+      "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/LB/Resource"
+   }
+  },
+  "CommunicationServiceFargateLBSecurityGroupCDD704DA": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB GlammeVpcStackCommunicationServiceFargateLB2FBA541E",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/LB/SecurityGroup/Resource"
+   }
+  },
+  "CommunicationServiceFargateLBSecurityGrouptoGlammeVpcStackCommunicationServiceFargateServiceSecurityGroup5FB864AA8080C155CB9E": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateServiceSecurityGroupE3A5C1A1",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateLBSecurityGroupCDD704DA",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8080
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/LB/SecurityGroup/to GlammeVpcStackCommunicationServiceFargateServiceSecurityGroup5FB864AA:8080"
+   }
+  },
+  "CommunicationServiceFargateLBPublicListenerC23676E4": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "CommunicationServiceFargateLBPublicListenerECSGroupB70EFEA9"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "CommunicationServiceFargateLBC5339D62"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/LB/PublicListener/Resource"
+   }
+  },
+  "CommunicationServiceFargateLBPublicListenerECSGroupB70EFEA9": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/actuator/health",
+    "HealthCheckPort": "8080",
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "CommunicationServiceFargateTaskDefTaskRoleAD85D38C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/TaskDef/TaskRole/Resource"
+   }
+  },
+  "CommunicationServiceFargateTaskDef0CF3B0F3": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Ref": "GlammeUserPool2DA4AD20"
+        }
+       },
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "S3_BUCKET",
+        "Value": {
+         "Ref": "GlammeBucket15BBD74E"
+        }
+       },
+       {
+        "Name": "COGNITO_CLIENT_ID",
+        "Value": {
+         "Ref": "GlammeUserPoolClient2D76F3C4"
+        }
+       },
+       {
+        "Name": "DB_HOST",
+        "Value": {
+         "Fn::GetAtt": [
+          "AuroraDatabase5475D328",
+          "Endpoint.Address"
+         ]
+        }
+       },
+       {
+        "Name": "OPENSEARCH_ENDPOINT",
+        "Value": {
+         "Fn::GetAtt": [
+          "OpenSearchDomain85D65221",
+          "DomainEndpoint"
+         ]
+        }
+       },
+       {
+        "Name": "DB_PORT",
+        "Value": "-1.8881545897087868E289"
+       },
+       {
+        "Name": "REDIS_HOST",
+        "Value": {
+         "Ref": "RedisCluster"
+        }
+       },
+       {
+        "Name": "REDIS_PORT",
+        "Value": "6379"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         "476114151082.dkr.ecr.us-east-1.",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/glamme/communication-service:latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "CommunicationServiceFargateTaskDefwebLogGroup266C4BB0"
+        },
+        "awslogs-stream-prefix": "CommunicationServiceFargate",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 8080,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateTaskDefExecutionRole89340FA1",
+      "Arn"
+     ]
+    },
+    "Family": "GlammeVpcStackCommunicationServiceFargateTaskDef33D197A6",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateTaskDefTaskRoleAD85D38C",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/TaskDef/Resource"
+   }
+  },
+  "CommunicationServiceFargateTaskDefwebLogGroup266C4BB0": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "CommunicationServiceFargateTaskDefExecutionRole89340FA1": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "CommunicationServiceFargateTaskDefExecutionRoleDefaultPolicyBDA799A4": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:ecr:us-east-1:476114151082:repository/glamme/communication-service"
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "CommunicationServiceFargateTaskDefwebLogGroup266C4BB0",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CommunicationServiceFargateTaskDefExecutionRoleDefaultPolicyBDA799A4",
+    "Roles": [
+     {
+      "Ref": "CommunicationServiceFargateTaskDefExecutionRole89340FA1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "CommunicationServiceFargateServiceDC737A5C": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "GlammeClusterE73AFC45"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 8080,
+      "TargetGroupArn": {
+       "Ref": "CommunicationServiceFargateLBPublicListenerECSGroupB70EFEA9"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "CommunicationServiceFargateServiceSecurityGroupE3A5C1A1",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "GlammeVpcPrivateSubnet1Subnet6B6A0479"
+       },
+       {
+        "Ref": "GlammeVpcPrivateSubnet2Subnet5804D822"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "CommunicationServiceFargateTaskDef0CF3B0F3"
+    }
+   },
+   "DependsOn": [
+    "CommunicationServiceFargateLBPublicListenerECSGroupB70EFEA9",
+    "CommunicationServiceFargateLBPublicListenerC23676E4",
+    "CommunicationServiceFargateTaskDefTaskRoleAD85D38C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/Service/Service"
+   }
+  },
+  "CommunicationServiceFargateServiceSecurityGroupE3A5C1A1": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "GlammeVpcStack/CommunicationServiceFargate/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "GlammeVpc9C24534F"
+    }
+   },
+   "DependsOn": [
+    "CommunicationServiceFargateTaskDefTaskRoleAD85D38C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/Service/SecurityGroup/Resource"
+   }
+  },
+  "CommunicationServiceFargateServiceSecurityGroupfromGlammeVpcStackCommunicationServiceFargateLBSecurityGroup1DE5A47D808011EDF780": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8080,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateServiceSecurityGroupE3A5C1A1",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "CommunicationServiceFargateLBSecurityGroupCDD704DA",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8080
+   },
+   "DependsOn": [
+    "CommunicationServiceFargateTaskDefTaskRoleAD85D38C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CommunicationServiceFargate/Service/SecurityGroup/from GlammeVpcStackCommunicationServiceFargateLBSecurityGroup1DE5A47D:8080"
+   }
+  },
+  "OAIE1EFC67F": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "Allows CloudFront to reach the bucket"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/OAI/Resource"
+   }
+  },
+  "GlammeDistribution7F9788EE": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "GlammeVpcStackGlammeDistributionOrigin1D5EE6C60",
+      "ViewerProtocolPolicy": "allow-all"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "GlammeBucket15BBD74E",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "GlammeVpcStackGlammeDistributionOrigin1D5EE6C60",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "OAIE1EFC67F"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeDistribution/Resource"
+   }
+  },
+  "GlammeDashboard531CE65C": {
+   "Type": "AWS::CloudWatch::Dashboard",
+   "Properties": {
+    "DashboardBody": "{\"widgets\":[]}",
+    "DashboardName": "Glamme-Monitoring"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/GlammeDashboard/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31UXW/iMBD8LX0PPmhPumdC2opTdY2g19dq4yzBR2JH/gChKP/91nFCAofuybvjsT07XvuRLZ7mbP4AJzPj+WFWiow1Wwv8EBH01SB/ZM1nzaPVTn6mqyh1WSn41mUSrcfGaKOcxQ/IShzxEVsao7gAK5S8kH3wvE798AvsK1g8wTlKtThSOG68lhY1xQMhKOmzpSWt+wqljbbInRb2/KqVqzsN/wWeC43G/AOvZYe3EXLNNlgrI6zS5xgMEmRYsyqdIUF+4RC+gC7AF2oOCe6EFEOZt4iSFoREPcH6tVvUR8GDdSFsI53TcQlYyOjw4azgy6WkJJ4CA5kq0sG8JJ7oTeK1NBak39x0FFOBhAI1ldX54FeF4YN0oZ3YeyHczpBVJRgrOOUYNrrWuPITvYw2UjVKg6D53oRCqUZVkS2dwi4idU+siR0/hCL6KAypogY8j3DI24irgixVrPlN+6ZKlZ5yiYdgVYq+mGvE37f5qsH6XjNsWde0a9eubwryGErvWn5zWX3dJTGyjiFkcaT3cn91dwVX+ZQnyB3Zc4Z4Mh9Mv1g6SdtIQMWajQoPrxtHjwZ3SlVQM72p4rLFEJNzpXL5TlNzsuZdi0LIJef0BtY5GUPvIrQ6cV485y4jIclaZG5o/GneH3ACy/e+n80+U6DzjjYkbRtt0Cin/ROgRlHVmFJN96dSrY4iR929Tfpg0NLHRdoKv+bd2drRtf6EI3xb/GBztvj+8McIMdOONFfINmH8C00Azp4CBQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "GlammeVpcStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "AuthServiceFargateLoadBalancerDNS59F8D1EC": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AuthServiceFargateLB1E170B51",
+     "DNSName"
+    ]
+   }
+  },
+  "AuthServiceFargateServiceURLF4AD98B5": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "AuthServiceFargateLB1E170B51",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "ImageServiceFargateLoadBalancerDNS8879C556": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ImageServiceFargateLB89C7E4BA",
+     "DNSName"
+    ]
+   }
+  },
+  "ImageServiceFargateServiceURL701BA858": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "ImageServiceFargateLB89C7E4BA",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "MatchingServiceFargateLoadBalancerDNSFFE65412": {
+   "Value": {
+    "Fn::GetAtt": [
+     "MatchingServiceFargateLB10F59BB0",
+     "DNSName"
+    ]
+   }
+  },
+  "MatchingServiceFargateServiceURLE1D486FA": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "MatchingServiceFargateLB10F59BB0",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "SocialServiceFargateLoadBalancerDNS23A6CF76": {
+   "Value": {
+    "Fn::GetAtt": [
+     "SocialServiceFargateLB3500EEEA",
+     "DNSName"
+    ]
+   }
+  },
+  "SocialServiceFargateServiceURL3976D151": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "SocialServiceFargateLB3500EEEA",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "ShoppingServiceFargateLoadBalancerDNS86D9F5BF": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ShoppingServiceFargateLB5E9E5077",
+     "DNSName"
+    ]
+   }
+  },
+  "ShoppingServiceFargateServiceURLCB5B71AE": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "ShoppingServiceFargateLB5E9E5077",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "CommunicationServiceFargateLoadBalancerDNS56008918": {
+   "Value": {
+    "Fn::GetAtt": [
+     "CommunicationServiceFargateLBC5339D62",
+     "DNSName"
+    ]
+   }
+  },
+  "CommunicationServiceFargateServiceURL990BDC8A": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "CommunicationServiceFargateLBC5339D62",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "VpcId": {
+   "Value": {
+    "Ref": "GlammeVpc9C24534F"
+   },
+   "Export": {
+    "Name": "VpcId"
+   }
+  },
+  "AuthServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/auth-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "AuthServiceRepoUri"
+   }
+  },
+  "ImageServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/image-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "ImageServiceRepoUri"
+   }
+  },
+  "MatchingServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/matching-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "MatchingServiceRepoUri"
+   }
+  },
+  "SocialServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/social-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "SocialServiceRepoUri"
+   }
+  },
+  "ShoppingServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/shopping-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "ShoppingServiceRepoUri"
+   }
+  },
+  "CommunicationServiceRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "476114151082.dkr.ecr.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/glamme/communication-service"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "CommunicationServiceRepoUri"
+   }
+  },
+  "DatabaseEndpoint": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AuroraDatabase5475D328",
+     "Endpoint.Address"
+    ]
+   },
+   "Export": {
+    "Name": "DatabaseEndpoint"
+   }
+  },
+  "RedisEndpoint": {
+   "Value": {
+    "Ref": "RedisCluster"
+   },
+   "Export": {
+    "Name": "RedisEndpoint"
+   }
+  },
+  "OpenSearchEndpoint": {
+   "Value": {
+    "Fn::GetAtt": [
+     "OpenSearchDomain85D65221",
+     "DomainEndpoint"
+    ]
+   },
+   "Export": {
+    "Name": "OpenSearchEndpoint"
+   }
+  },
+  "UserPoolId": {
+   "Value": {
+    "Ref": "GlammeUserPool2DA4AD20"
+   },
+   "Export": {
+    "Name": "UserPoolId"
+   }
+  },
+  "UserPoolClientId": {
+   "Value": {
+    "Ref": "GlammeUserPoolClient2D76F3C4"
+   },
+   "Export": {
+    "Name": "UserPoolClientId"
+   }
+  },
+  "CloudFrontUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "GlammeDistribution7F9788EE",
+     "DomainName"
+    ]
+   },
+   "Export": {
+    "Name": "CloudFrontUrl"
+   }
+  },
+  "AuthServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AuthServiceFargateLB1E170B51",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "AuthServiceUrl"
+   }
+  },
+  "ImageServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ImageServiceFargateLB89C7E4BA",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "ImageServiceUrl"
+   }
+  },
+  "MatchingServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "MatchingServiceFargateLB10F59BB0",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "MatchingServiceUrl"
+   }
+  },
+  "SocialServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "SocialServiceFargateLB3500EEEA",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "SocialServiceUrl"
+   }
+  },
+  "ShoppingServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ShoppingServiceFargateLB5E9E5077",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "ShoppingServiceUrl"
+   }
+  },
+  "CommunicationServiceUrl": {
+   "Value": {
+    "Fn::GetAtt": [
+     "CommunicationServiceFargateLBC5339D62",
+     "DNSName"
+    ]
+   },
+   "Export": {
+    "Name": "CommunicationServiceUrl"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

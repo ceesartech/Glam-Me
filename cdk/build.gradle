@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'tech.ceesar.glamme.cdk'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.gradle.org/gradle/libs-releases'
+    }
+    maven {
+        url 'https://aws.oss.sonatype.org/content/repositories/snapshots/'
+    }
+    maven {
+        url 'https://maven.pkg.github.com/aws/aws-cdk'
+        credentials {
+            username = System.getenv('GITHUB_ACTOR') ?: 'dummy'
+            password = System.getenv('GITHUB_TOKEN') ?: 'dummy'
+        }
+    }
+}
+
+dependencies {
+    implementation platform('software.amazon.awscdk:aws-cdk-lib:2.130.0')
+    implementation 'software.amazon.awscdk:aws-cdk-lib'
+}
+
+application {
+    mainClass = 'tech.ceesar.glamme.cdk.GlammeCdkApp'
+}

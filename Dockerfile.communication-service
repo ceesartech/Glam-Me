@@ -1,0 +1,33 @@
+# Multi-stage build for communication-service
+FROM amazoncorretto:17 AS builder
+
+WORKDIR /app
+
+# Copy Gradle wrapper and build files
+COPY gradlew gradlew.bat build.gradle settings.gradle ./
+COPY gradle/ gradle/
+COPY common/ common/
+
+# Copy communication-service specific files
+COPY communication-service/ communication-service/
+
+# Grant execute permission to gradlew
+RUN chmod +x ./gradlew
+
+# Build the application
+RUN ./gradlew :communication-service:bootJar -x test --no-daemon
+
+FROM amazoncorretto:17
+
+WORKDIR /app
+
+# Copy the built JAR from builder stage
+COPY --from=builder /app/communication-service/build/libs/*.jar app.jar
+
+# Create non-root user
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
