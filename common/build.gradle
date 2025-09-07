@@ -21,6 +21,7 @@
 plugins {
     id 'java'
     id 'java-library'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'tech.ceesar.glamme.common'
@@ -35,6 +36,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.4.4'
+    }
+}
+
 dependencies {
     // Lombok for boilerplate reduction
     compileOnly 'org.projectlombok:lombok:1.18.28'
@@ -47,8 +54,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
 
     // Spring core for annotations and utilities
-    implementation 'org.springframework:spring-core:6.0.9'
-    implementation 'org.springframework:spring-context:6.0.9'
+    implementation 'org.springframework:spring-core'
+    implementation 'org.springframework:spring-context'
 
     // AWS SDK v2 Core
     implementation 'software.amazon.awssdk:s3:2.20.162'
@@ -84,7 +91,7 @@ dependencies {
     // Spring Session Redis for distributed sessions
     implementation 'org.springframework.session:spring-session-data-redis'
 
-    // Spring Scheduling for message consumers
+    // Spring Context Support for scheduling
     implementation 'org.springframework:spring-context-support'
 
     // AppConfig for feature flags
