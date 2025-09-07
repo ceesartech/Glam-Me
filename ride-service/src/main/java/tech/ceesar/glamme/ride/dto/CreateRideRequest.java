@@ -24,4 +24,15 @@ public class CreateRideRequest {
     private LocationDto dropoffLocation;
 
     private ProviderType providerType;
+
+    private String productId;              // optional
+
+    // Helper methods for compatibility
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
 }

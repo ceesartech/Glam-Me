@@ -55,4 +55,9 @@ public class RideRequest {
     private double actualFare;
 
     private String currency;
+
+    // Helper methods for compatibility
+    public String getRideId() {
+        return rideRequestId != null ? rideRequestId.toString() : null;
+    }
 }

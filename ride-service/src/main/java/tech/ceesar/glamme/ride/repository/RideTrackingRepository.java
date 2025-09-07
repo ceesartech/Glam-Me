@@ -8,6 +8,7 @@ import tech.ceesar.glamme.ride.entity.RideTracking;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RideTrackingRepository extends JpaRepository<RideTracking, Long> {
@@ -25,5 +26,5 @@ public interface RideTrackingRepository extends JpaRepository<RideTracking, Long
                                                         @Param("endTime") LocalDateTime endTime);
     
     @Query("SELECT rt FROM RideTracking rt WHERE rt.rideId = :rideId AND rt.timestamp = (SELECT MAX(rt2.timestamp) FROM RideTracking rt2 WHERE rt2.rideId = :rideId)")
-    RideTracking findLatestByRideId(@Param("rideId") String rideId);
+    Optional<RideTracking> findLatestByRideId(@Param("rideId") String rideId);
 }

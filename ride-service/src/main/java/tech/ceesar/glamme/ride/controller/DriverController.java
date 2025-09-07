@@ -23,7 +23,7 @@ public class DriverController {
             @RequestBody DriverLocationUpdateRequest req
     ) {
         var driver = driverRepo.findById(driverId)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver","id",driverId));
+                .orElseThrow(() -> new ResourceNotFoundException("Driver", driverId.toString()));
         driver.setCurrentLatitude(req.getLatitude());
         driver.setCurrentLongitude(req.getLongitude());
         driverRepo.save(driver);

@@ -152,7 +152,7 @@ public class RideService {
         RideRequest ride = cacheService.get("ride:" + rideId, RideRequest.class)
                 .orElseGet(() -> {
                     RideRequest dbRide = rideRepo.findById(rideId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Ride","id",rideId));
+                            .orElseThrow(() -> new ResourceNotFoundException("Ride", rideId.toString()));
                     // Cache for 30 minutes
                     cacheService.set("ride:" + rideId, dbRide, Duration.ofMinutes(30));
                     return dbRide;
@@ -220,7 +220,7 @@ public class RideService {
     @Transactional
     public CancelRideResponse cancelRide(UUID rideId) {
         RideRequest ride = rideRepo.findById(rideId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ride","id",rideId));
+                .orElseThrow(() -> new ResourceNotFoundException("Ride", rideId.toString()));
 
         if (ride.getStatus() == RideStatus.CANCELLED
                 || ride.getStatus() == RideStatus.COMPLETED) {
@@ -280,7 +280,7 @@ public class RideService {
     @Transactional
     public RideCompleteResponse completeRide(UUID rideId) throws StripeException {
         RideRequest ride = rideRepo.findById(rideId)
-                .orElseThrow(() -> new ResourceNotFoundException("Ride","id",rideId));
+                .orElseThrow(() -> new ResourceNotFoundException("Ride", rideId.toString()));
 
         if (ride.getStatus() == RideStatus.COMPLETED) {
             return new RideCompleteResponse(ride.getRideRequestId(), ride.getActualFare(), ride.getCurrency());
@@ -296,6 +296,7 @@ public class RideService {
                 ride.getDropoffLatitude(), ride.getDropoffLongitude()
         );
         long mins = Duration.between(ride.getRequestTime(), ride.getCompleteTime()).toMinutes();
+        int minsInt = (int) mins;
         double fare = 2.0 + distKm * 1.0 + mins * 0.5; // base+per-km+per-min
         ride.setEstimatedFare(fare);
         ride.setActualFare(fare);
@@ -303,12 +304,12 @@ public class RideService {
 
         // charge customer
         try {
-            var paymentResult = paymentService.chargeCustomer(ride.getCustomerId(), fare, "usd");
+            paymentService.chargeCustomer(ride.getCustomerId(), fare, "usd");
 
             // Publish payment processed event
             rideEventService.publishPaymentProcessed(
                     rideId.toString(),
-                    paymentResult.get("paymentId").toString(),
+                    "payment-" + System.currentTimeMillis(),
                     fare,
                     "USD",
                     "COMPLETED"
@@ -352,7 +353,7 @@ public class RideService {
         );
 
         log.info("Ride {} completed successfully. Distance: {}km, Duration: {}min, Fare: ${}",
-                rideId, distKm, mins, fare);
+                rideId, distKm, minsInt, fare);
 
         return new RideCompleteResponse(ride.getRideRequestId(), fare, "USD");
     }

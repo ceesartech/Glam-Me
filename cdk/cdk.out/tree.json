@@ -1536,6 +1536,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -1545,37 +1563,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -1585,12 +1578,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
@@ -2197,6 +2197,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -2206,37 +2224,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -2246,12 +2239,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
@@ -2858,6 +2858,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -2867,37 +2885,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -2907,12 +2900,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
@@ -3519,6 +3519,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -3528,37 +3546,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -3568,12 +3561,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
@@ -4180,6 +4180,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -4189,37 +4207,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -4229,12 +4222,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
@@ -4841,6 +4841,24 @@
                             },
                             "environment": [
                               {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087877E289"
+                              },
+                              {
                                 "name": "OPENSEARCH_ENDPOINT",
                                 "value": {
                                   "Fn::GetAtt": [
@@ -4850,37 +4868,12 @@
                                 }
                               },
                               {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
+                                "name": "DB_HOST",
                                 "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
-                              },
-                              {
-                                "name": "COGNITO_USER_POOL_ID",
-                                "value": {
-                                  "Ref": "GlammeUserPool2DA4AD20"
-                                }
-                              },
-                              {
-                                "name": "AWS_REGION",
-                                "value": "us-east-1"
-                              },
-                              {
-                                "name": "S3_BUCKET",
-                                "value": {
-                                  "Ref": "GlammeBucket15BBD74E"
+                                  "Fn::GetAtt": [
+                                    "AuroraDatabase5475D328",
+                                    "Endpoint.Address"
+                                  ]
                                 }
                               },
                               {
@@ -4890,12 +4883,19 @@
                                 }
                               },
                               {
-                                "name": "DB_HOST",
+                                "name": "S3_BUCKET",
                                 "value": {
-                                  "Fn::GetAtt": [
-                                    "AuroraDatabase5475D328",
-                                    "Endpoint.Address"
-                                  ]
+                                  "Ref": "GlammeBucket15BBD74E"
+                                }
+                              },
+                              {
+                                "name": "AWS_REGION",
+                                "value": "us-east-1"
+                              },
+                              {
+                                "name": "COGNITO_USER_POOL_ID",
+                                "value": {
+                                  "Ref": "GlammeUserPool2DA4AD20"
                                 }
                               }
                             ]
