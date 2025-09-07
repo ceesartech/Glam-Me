@@ -1,41 +1,65 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
+  application:
+    name: auth-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:aws}
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:authdb}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glamme}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
-  security:
-    oauth2:
-          client:
-            registration:
-              google:
-                client-id: ${GOOGLE_CLIENT_ID}
-                client-secret: ${GOOGLE_CLIENT_SECRET}
-                scope: openid, profile, email
-                redirect-uri: "{baseUrl}/api/auth/oauth2/google/callback"
-              facebook:
-                client-id: ${FB_CLIENT_ID}
-                client-secret: ${FB_CLIENT_SECRET}
-                scope: email, public_profile
-                redirect-uri: "{baseUrl}/api/auth/oauth2/facebook/callback"
-              apple:
-                client-id: ${APPLE_CLIENT_ID}
-                client-secret: ${APPLE_CLIENT_SECRET}
-                redirect-uri: "{baseUrl}/api/auth/oauth2/apple/callback"
-              amazon:
-                client-id: ${AMZN_CLIENT_ID}
-                client-secret: ${AMZN_CLIENT_SECRET}
-                redirect-uri: "{baseUrl}/api/auth/oauth2/amazon/callback"
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
 
-jwt:
-  secret: ${JWT_SECRET:change_me_in_env}
-  expirationMs: 3600000
+aws:
+  region: ${AWS_REGION:us-east-1}
+  cognito:
+    user-pool-id: ${COGNITO_USER_POOL_ID}
+    client-id: ${COGNITO_CLIENT_ID}
+  kms:
+    database-key-id: ${KMS_DATABASE_KEY_ID:}
+    app-key-id: ${KMS_APP_KEY_ID:}
+  appconfig:
+    application-id: ${APPCONFIG_APPLICATION_ID:}
+    environment-id: ${APPCONFIG_ENVIRONMENT_ID:}
+    configuration-profile-id: ${APPCONFIG_PROFILE_ID:}
+  secrets:
+    database-arn: ${DATABASE_SECRET_ARN:}
 
-frontend:
-  url: ${FRONTEND_URL:http://localhost:3000}
+logging:
+  level:
+    tech.ceesar.glamme: INFO
+    software.amazon.awssdk: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 0.1
+
+logging:
+  level:
+    com.amazonaws.xray: DEBUG

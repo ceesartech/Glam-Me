@@ -24,6 +24,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Lombok annotations
     compileOnly 'org.projectlombok:lombok:1.18.28'
@@ -38,14 +40,19 @@ dependencies {
     // PostgreSQL driver
     runtimeOnly 'org.postgresql:postgresql:42.7.2'
 
-    // Math library for Elo if needed
+    // Math library for Elo calculations
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core:latest.release'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // If using JUnit 5
-    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release' // For JUnit 5 and Mockito annotations
+    // OpenSearch client
+    implementation 'org.opensearch.client:opensearch-java:2.7.0'
 
+    // AWS SDK for OpenSearch Serverless
+    implementation 'software.amazon.awssdk:opensearchserverless:2.20.35'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 }
 
 tasks.test {

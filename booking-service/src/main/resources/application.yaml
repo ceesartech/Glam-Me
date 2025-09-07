@@ -1,23 +1,75 @@
 server:
-  port: 8084
+  port: 8083
 
 spring:
+  application:
+    name: booking-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:aws}
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:bookingdb}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glamme}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
 
-stripe:
-  apiKey: ${STRIPE_API_KEY}
-  webhookSecret: ${STRIPE_WEBHOOK_SECRET}
-  successUrl: ${FRONTEND_URL:http://localhost:3000}/booking-success?session_id={CHECKOUT_SESSION_ID}
-  cancelUrl: ${FRONTEND_URL:http://localhost:3000}/booking-cancel
+aws:
+  region: ${AWS_REGION:us-east-1}
+  eventbridge:
+    bus-name: ${EVENTBRIDGE_BUS_NAME:glamme-bus}
+  sqs:
+    booking-events-queue-url: ${BOOKING_EVENTS_QUEUE_URL}
+  secrets:
+    database-arn: ${DATABASE_SECRET_ARN:}
+    google-arn: ${GOOGLE_SECRET_ARN:}
+    stripe-arn: ${STRIPE_SECRET_ARN:}
 
-google:
-  credentials:
-    file: ${GOOGLE_CREDENTIALS_FILE:credentials.json}
+booking:
   calendar:
-    id: ${GOOGLE_CALENDAR_ID:primary}
+    google:
+      redirect-uri: ${GOOGLE_REDIRECT_URI:https://api.glamme.com/oauth2/callback/google}
+    apple:
+      enabled: true
+  notifications:
+    reminder-hours-before: 24
+    confirmation-enabled: true
+    cancellation-enabled: true
+  payment:
+    hold-duration-hours: 24
+  scheduling:
+    timezone: ${BOOKING_TIMEZONE:UTC}
+    business-hours:
+      start: 09:00
+      end: 18:00
+    slot-duration-minutes: 30
+    advance-booking-days: 30
+    cancellation-hours-before: 24
+
+logging:
+  level:
+    tech.ceesar.glamme: INFO
+    software.amazon.awssdk: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

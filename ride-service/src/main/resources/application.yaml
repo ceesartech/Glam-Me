@@ -1,21 +1,78 @@
 server:
-  port: 8089
+  port: 8080
 
 spring:
+  application:
+    name: ride-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:aws}
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ridedb}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glamme}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
 
-stripe:
-  apiKey: ${STRIPE_API_KEY}
+aws:
+  region: ${AWS_REGION:us-east-1}
+  eventbridge:
+    bus-name: ${EVENTBRIDGE_BUS_NAME:glamme-bus}
+  sqs:
+    ride-events-queue: ${SQS_RIDE_EVENTS_QUEUE:ride-events-queue}
+  secrets:
+    database-arn: ${DATABASE_SECRET_ARN:}
+    uber-arn: ${UBER_SECRET_ARN:}
+    lyft-arn: ${LYFT_SECRET_ARN:}
+    stripe-arn: ${STRIPE_SECRET_ARN:}
 
-external:
-  uber:
-    apiKey: ${UBER_API_KEY:}
-  lyft:
-    clientId: ${LYFT_CLIENT_ID:}
-    clientSecret: ${LYFT_CLIENT_SECRET:}
+ride:
+  providers:
+    uber:
+      base-url: ${UBER_BASE_URL:https://api.uber.com}
+    lyft:
+      base-url: ${LYFT_BASE_URL:https://api.lyft.com}
+  payment:
+    hold-duration-hours: 24
+  tracking:
+    update-interval-seconds: 30
+    max-tracking-duration-hours: 2
+  pricing:
+    base-fare: 5.00
+    per-mile-rate: 2.50
+    per-minute-rate: 0.50
+    minimum-fare: 8.00
+    surge-multiplier-max: 3.0
+  matching:
+    max-distance-miles: 10
+    max-wait-time-minutes: 15
+    driver-timeout-minutes: 5
+
+logging:
+  level:
+    tech.ceesar.glamme: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

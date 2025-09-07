@@ -1536,6 +1536,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -1565,33 +1592,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }
@@ -2197,6 +2197,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -2226,33 +2253,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }
@@ -2858,6 +2858,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -2887,33 +2914,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }
@@ -3519,6 +3519,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -3548,33 +3575,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }
@@ -4180,6 +4180,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -4209,33 +4236,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }
@@ -4841,6 +4841,33 @@
                             },
                             "environment": [
                               {
+                                "name": "OPENSEARCH_ENDPOINT",
+                                "value": {
+                                  "Fn::GetAtt": [
+                                    "OpenSearchDomain85D65221",
+                                    "DomainEndpoint"
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "DB_PORT",
+                                "value": "-1.8881545897087868E289"
+                              },
+                              {
+                                "name": "REDIS_HOST",
+                                "value": {
+                                  "Ref": "RedisCluster"
+                                }
+                              },
+                              {
+                                "name": "REDIS_PORT",
+                                "value": "6379"
+                              },
+                              {
+                                "name": "SPRING_PROFILES_ACTIVE",
+                                "value": "prod"
+                              },
+                              {
                                 "name": "COGNITO_USER_POOL_ID",
                                 "value": {
                                   "Ref": "GlammeUserPool2DA4AD20"
@@ -4870,33 +4897,6 @@
                                     "Endpoint.Address"
                                   ]
                                 }
-                              },
-                              {
-                                "name": "OPENSEARCH_ENDPOINT",
-                                "value": {
-                                  "Fn::GetAtt": [
-                                    "OpenSearchDomain85D65221",
-                                    "DomainEndpoint"
-                                  ]
-                                }
-                              },
-                              {
-                                "name": "DB_PORT",
-                                "value": "-1.8881545897087868E289"
-                              },
-                              {
-                                "name": "REDIS_HOST",
-                                "value": {
-                                  "Ref": "RedisCluster"
-                                }
-                              },
-                              {
-                                "name": "REDIS_PORT",
-                                "value": "6379"
-                              },
-                              {
-                                "name": "SPRING_PROFILES_ACTIVE",
-                                "value": "prod"
                               }
                             ]
                           }

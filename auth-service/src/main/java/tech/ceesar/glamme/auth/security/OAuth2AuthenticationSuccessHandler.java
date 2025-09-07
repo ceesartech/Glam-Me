@@ -47,8 +47,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .email(email)
                     .roles(Set.of(Role.CUSTOMER))
                     .subscriptionType(SubscriptionType.FREE)
-                    .oauthProvider(provider)
-                    .oauthProviderId(finalProviderId)
+                    .oauthProvider(finalProviderId)
                     .createdAt(Instant.now())
                     .build();
 

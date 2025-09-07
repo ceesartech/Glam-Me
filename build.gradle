@@ -1,7 +1,6 @@
 buildscript {
     repositories { mavenCentral() }
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:3.4.4'
         classpath 'io.spring.gradle:dependency-management-plugin:1.1.2'
         classpath 'com.vaadin:vaadin-gradle-plugin:24.7.3'
     }
@@ -9,7 +8,6 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.vaadin' version '24.7.3'
 }

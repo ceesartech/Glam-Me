@@ -10,7 +10,7 @@ AWS_REGION="us-east-1"
 AWS_PROFILE="default"
 ACCOUNT_ID="476114151082"
 ROLE_NAME="GlamMe-CICD-Role"
-REPO_NAME="chijiokeekechi/GlamMe"
+REPO_NAME="ceesartech/Glam-Me"
 
 echo "🚀 Setting up CI/CD IAM Role for GlamMe..."
 

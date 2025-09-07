@@ -21,11 +21,18 @@ public class User {
     @GeneratedValue
     private UUID id;
 
+    @Column(name = "cognito_sub", unique = true)
+    private String cognitoSub;
+
+    @Column(name = "username", unique = true)
+    private String username;
+
     private String name;
-    private String password;
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -36,7 +43,21 @@ public class User {
     @Enumerated(EnumType.STRING)
     private SubscriptionType subscriptionType;
 
+    @Column(name = "user_type")
+    private String userType; // customer, stylist, admin
+
+    @Column(name = "plan")
+    private String plan; // FREE, PRO, PREMIUM
+
+    @Column(name = "oauth_provider")
     private String oauthProvider;
-    private String oauthProviderId;
+
+    @Column(name = "enabled")
+    private Boolean enabled;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified;
+
     private Instant createdAt;
+    private Instant updatedAt;
 }

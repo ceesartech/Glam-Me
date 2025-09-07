@@ -1,112 +1,167 @@
 package tech.ceesar.glamme.matching.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import tech.ceesar.glamme.common.dto.ApiResponse;
 import tech.ceesar.glamme.common.dto.PagedResponse;
-import tech.ceesar.glamme.matching.dto.OfferingResponse;
-import tech.ceesar.glamme.matching.dto.PairDto;
-import tech.ceesar.glamme.matching.dto.StableMatchRequest;
+import tech.ceesar.glamme.matching.dto.*;
+import tech.ceesar.glamme.matching.entity.CustomerPreference;
 import tech.ceesar.glamme.matching.service.MatchingService;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/match")
+@RequestMapping("/api/matching")
 @RequiredArgsConstructor
 public class MatchingController {
 
     private final MatchingService matchingService;
 
-//    /**
-//     * Recommend offerings for a given hairstyle:
-//     * - styleName: e.g. "bob"
-//     * - latitude, longitude: customer's location
-//     * - limit (optional, default=10)
-//     */
-//    @GetMapping("/recommend")
-//    public ResponseEntity<List<OfferingResponse>> recommend(
-//            @RequestParam String styleName,
-//            @RequestParam double latitude,
-//            @RequestParam double longitude,
-//            @RequestParam(defaultValue = "10") int limit
-//    ) {
-//        List<OfferingResponse> list = matchingService.recommendOfferings(
-//                styleName, latitude, longitude, limit);
-//        return ResponseEntity.ok(list);
-//    }
-
-    /**
-     * Recommend offerings, with optional price filtering and pagination.
-     *
-     * @param styleName The hairstyle to match on.
-     * @param latitude  Customer latitude.
-     * @param longitude Customer longitude.
-     * @param page      Zero-based page index (default 0).
-     * @param size      Page size (default 10).
-     * @param minCost   Optional minimum total cost filter.
-     * @param maxCost   Optional maximum total cost filter.
-     */
-    @GetMapping("/recommend")
-    public PagedResponse<OfferingResponse> recommend(
-            @RequestParam String styleName,
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Double minCost,
-            @RequestParam(required = false) Double maxCost
+    @PostMapping("/stylists/onboard")
+    public ResponseEntity<ApiResponse<StylistResponse>> onboardStylist(
+            @Valid @RequestBody StylistOnboardingRequest request,
+            Authentication authentication
     ) {
-        // 1) Fetch *all* matching offerings (unbounded limit)
-        List<OfferingResponse> all = matchingService.recommendOfferings(
-                styleName, latitude, longitude, Integer.MAX_VALUE
-        );
-
-        // 2) Apply cost filtering
-        Stream<OfferingResponse> stream = all.stream();
-        if (minCost != null) {
-            stream = stream.filter(o -> o.getTotalCost() >= minCost);
+        try {
+            String userId = authentication.getName();
+            StylistResponse response = matchingService.onboardStylist(userId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Stylist onboarded successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
         }
-        if (maxCost != null) {
-            stream = stream.filter(o -> o.getTotalCost() <= maxCost);
-        }
-        List<OfferingResponse> filtered = stream.collect(Collectors.toList());
-
-        // 3) Compute pagination indices
-        int total = filtered.size();
-        int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size, total);
-
-        List<OfferingResponse> content = (fromIndex >= total)
-                ? Collections.emptyList()
-                : filtered.subList(fromIndex, toIndex);
-
-        int totalPages = size > 0
-                ? (int) Math.ceil((double) total / size)
-                : 1;
-        boolean last = page >= (totalPages - 1);
-
-        // 4) Return paged response
-        return new PagedResponse<>(
-                content,
-                page,
-                size,
-                total,
-                totalPages,
-                last
-        );
     }
 
-    /**
-     * Stable matching for multiple customers & stylists.
-     */
-    @PostMapping("/stable")
-    public ResponseEntity<List<PairDto>> stableMatch(
-            @RequestBody StableMatchRequest matchRequest
+    @PutMapping("/stylists/profile")
+    public ResponseEntity<ApiResponse<StylistResponse>> updateStylistProfile(
+            @Valid @RequestBody StylistOnboardingRequest request,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(matchingService.stableMatch(matchRequest));
+        try {
+            String userId = authentication.getName();
+            StylistResponse response = matchingService.updateStylistProfile(userId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Stylist profile updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PutMapping("/customers/preferences")
+    public ResponseEntity<ApiResponse<CustomerPreference>> updateCustomerPreferences(
+            @Valid @RequestBody CustomerPreferenceRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            CustomerPreference response = matchingService.updateCustomerPreferences(customerId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Customer preferences updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<ApiResponse<PagedResponse<StylistResponse>>> recommendStylists(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            PagedResponse<StylistResponse> response = matchingService.recommendStylists(customerId, page, size);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/matches")
+    public ResponseEntity<ApiResponse<MatchResponse>> createMatch(
+            @Valid @RequestBody MatchRequest request,
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            MatchResponse response = matchingService.createMatch(customerId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Match created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/matches/{matchId}/respond")
+    public ResponseEntity<ApiResponse<MatchResponse>> respondToMatch(
+            @PathVariable Long matchId,
+            @RequestParam boolean accepted,
+            Authentication authentication
+    ) {
+        try {
+            String stylistId = authentication.getName();
+            MatchResponse response = matchingService.respondToMatch(matchId, stylistId, accepted);
+            return ResponseEntity.ok(ApiResponse.success(response, 
+                    accepted ? "Match accepted successfully" : "Match declined successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/matches/customer")
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> getCustomerMatches(
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            List<MatchResponse> response = matchingService.getCustomerMatches(customerId);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/matches/stylist")
+    public ResponseEntity<ApiResponse<List<MatchResponse>>> getStylistMatches(
+            Authentication authentication
+    ) {
+        try {
+            String stylistId = authentication.getName();
+            List<MatchResponse> response = matchingService.getStylistMatches(stylistId);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/matches/{matchId}")
+    public ResponseEntity<ApiResponse<Void>> cancelMatch(
+            @PathVariable Long matchId,
+            Authentication authentication
+    ) {
+        try {
+            String userId = authentication.getName();
+            matchingService.cancelMatch(matchId, userId);
+            return ResponseEntity.ok(ApiResponse.success(null, "Match cancelled successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

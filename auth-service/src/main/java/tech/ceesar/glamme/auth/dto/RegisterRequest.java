@@ -10,6 +10,9 @@ public class RegisterRequest {
     @NotBlank
     private String name;
 
+    @NotBlank
+    private String username;
+
     @Email
     @NotBlank
     private String email;

@@ -98,7 +98,7 @@ public class SocialService {
 
     public PostResponse getPost(UUID userId, UUID postId) {
         Post p = postRepo.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", postId.toString()));
         // check block
         if (blockRepo.existsByBlockerIdAndBlockedId(p.getUserId(), userId)
                 || blockRepo.existsByBlockerIdAndBlockedId(userId, p.getUserId())) {
@@ -189,20 +189,18 @@ public class SocialService {
         }).toList();
 
         // 4) Return paged response
-        return new PagedResponse<>(
+        return PagedResponse.of(
                 dtos,
                 postsPage.getNumber(),
                 postsPage.getSize(),
-                postsPage.getTotalElements(),
-                postsPage.getTotalPages(),
-                postsPage.isLast()
+                postsPage.getTotalElements()
         );
     }
 
     @Transactional
     public void deletePost(UUID userId, UUID postId, boolean isAdmin) {
         Post p = postRepo.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", postId.toString()));
         if (!isAdmin && !p.getUserId().equals(userId)) {
             throw new BadRequestException("Not authorized");
         }
@@ -227,7 +225,7 @@ public class SocialService {
     @Transactional
     public CommentResponse addComment(UUID userId, UUID postId, CommentRequest req) {
         Post p = postRepo.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", postId.toString()));
         Comment c = commentRepo.save(Comment.builder()
                 .userId(userId)
                 .post(p)
@@ -285,7 +283,7 @@ public class SocialService {
     @Transactional
     public CreatePostResponse repost(UUID userId, UUID postId) {
         Post original = postRepo.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", postId.toString()));
         Post rp = Post.builder()
                 .userId(userId)
                 .caption(original.getCaption())

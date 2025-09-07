@@ -1,83 +1,131 @@
 package tech.ceesar.glamme.booking.controller;
 
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.exception.StripeException;
-import com.stripe.model.Event;
-import com.stripe.model.checkout.Session;
-import com.stripe.net.Webhook;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import tech.ceesar.glamme.booking.dto.CreateBookingRequest;
-import tech.ceesar.glamme.booking.dto.CreateBookingResponse;
-import tech.ceesar.glamme.booking.service.BookingService;
+import tech.ceesar.glamme.booking.dto.*;
+import tech.ceesar.glamme.common.dto.ApiResponse;
 
-import java.io.BufferedReader;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
 public class BookingController {
+
     private final BookingService bookingService;
 
-    @Value("${stripe.webhookSecret}")
-    private String webhookSecret;
-
     @PostMapping
-    public ResponseEntity<CreateBookingResponse> createBooking(
-            @Valid @RequestBody CreateBookingRequest bookingRequest
-    ) throws StripeException {
-        var response = bookingService.createBooking(bookingRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    // Cancel
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancel(
-            @PathVariable("id") UUID bookingId
+    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
+            @Valid @RequestBody BookingRequest request,
+            Authentication authentication
     ) {
-        bookingService.cancelBooking(bookingId);
-        return ResponseEntity.noContent().build();
-    }
-
-    // Complete
-    @PutMapping("/{id}/complete")
-    public ResponseEntity<Void> complete(
-            @PathVariable("id") UUID bookingId
-    ) {
-        bookingService.completeBooking(bookingId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/webhook")
-    public ResponseEntity<Void> handleWebhook(
-            HttpServletRequest request,
-            @RequestHeader("Stripe-Signature") String sigHeader
-    ) throws Exception {
-        // read raw body
-        StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader reader = request.getReader()) {
-            reader.lines().forEach(stringBuilder::append);
-        }
-        String payload = stringBuilder.toString();
-
-        Event event;
         try {
-            event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
-        } catch (SignatureVerificationException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            String customerId = authentication.getName();
+            BookingResponse response = bookingService.createBooking(customerId, request);
+            return ResponseEntity.ok(ApiResponse.success(response, "Booking created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
         }
+    }
 
-        if ("checkout.session.completed".equals(event.getType())) {
-            Session session = (Session) event.getData().getObject();
-            UUID bookingId = UUID.fromString(session.getClientReferenceId());
-            bookingService.handlePaymentSucceeded(bookingId);
+    @PostMapping("/{bookingId}/confirm")
+    public ResponseEntity<ApiResponse<BookingResponse>> confirmBooking(
+            @PathVariable String bookingId,
+            @RequestParam String confirmationCode
+    ) {
+        try {
+            BookingResponse response = bookingService.confirmBooking(bookingId, confirmationCode);
+            return ResponseEntity.ok(ApiResponse.success(response, "Booking confirmed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
         }
-        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{bookingId}/cancel")
+    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(
+            @PathVariable String bookingId,
+            @RequestParam(required = false) String reason,
+            Authentication authentication
+    ) {
+        try {
+            String userId = authentication.getName();
+            BookingResponse response = bookingService.cancelBooking(bookingId, userId, reason);
+            return ResponseEntity.ok(ApiResponse.success(response, "Booking cancelled successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{bookingId}/complete")
+    public ResponseEntity<ApiResponse<BookingResponse>> completeBooking(
+            @PathVariable String bookingId,
+            Authentication authentication
+    ) {
+        try {
+            String stylistId = authentication.getName();
+            BookingResponse response = bookingService.completeBooking(bookingId, stylistId);
+            return ResponseEntity.ok(ApiResponse.success(response, "Booking completed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/customer")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getCustomerBookings(
+            Authentication authentication
+    ) {
+        try {
+            String customerId = authentication.getName();
+            List<BookingResponse> response = bookingService.getCustomerBookings(customerId);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/stylist")
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getStylistBookings(
+            Authentication authentication
+    ) {
+        try {
+            String stylistId = authentication.getName();
+            List<BookingResponse> response = bookingService.getStylistBookings(stylistId);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/availability/{stylistId}")
+    public ResponseEntity<ApiResponse<List<TimeSlotResponse>>> getAvailableTimeSlots(
+            @PathVariable String stylistId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        try {
+            List<TimeSlotResponse> response = bookingService.getAvailableTimeSlots(stylistId, startDate, endDate);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
     }
 }

@@ -1,0 +1,161 @@
+package tech.ceesar.glamme.communication.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import tech.ceesar.glamme.communication.dto.CallRequest;
+import tech.ceesar.glamme.communication.dto.CallResponse;
+import tech.ceesar.glamme.communication.dto.SendSmsRequest;
+import tech.ceesar.glamme.communication.dto.SendSmsResponse;
+import tech.ceesar.glamme.communication.dto.PushResponse;
+import tech.ceesar.glamme.communication.dto.BulkSmsResponse;
+import tech.ceesar.glamme.communication.service.CommunicationService;
+import tech.ceesar.glamme.communication.service.aws.ChimeService;
+import tech.ceesar.glamme.communication.service.aws.PinpointService;
+import tech.ceesar.glamme.communication.service.aws.SesService;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/communication")
+@RequiredArgsConstructor
+@Slf4j
+public class CommunicationController {
+    private final CommunicationService communicationService;
+    private final SesService sesService;
+    private final PinpointService pinpointService;
+    private final ChimeService chimeService;
+
+    /**
+     * Send SMS via AWS Pinpoint.
+     */
+    @PostMapping("/sms")
+    public ResponseEntity<SendSmsResponse> sendSms(
+            @RequestBody SendSmsRequest req) {
+        return ResponseEntity.ok(communicationService.sendSms(req));
+    }
+
+    /**
+     * AWS SNS/SMS status callback.
+     */
+    @PostMapping("/sms/status")
+    public ResponseEntity<Void> smsStatus(
+            @RequestParam("MessageId") String messageId,
+            @RequestParam("Status") String status) {
+        communicationService.handleSmsStatusCallback(messageId, status);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * AWS SNS webhook for inbound SMS.
+     */
+    @PostMapping("/sms/incoming")
+    public ResponseEntity<Void> inboundSms(
+            @RequestParam("From") String from,
+            @RequestParam("To") String to,
+            @RequestParam("Body") String body,
+            @RequestParam("MessageId") String messageId) {
+        communicationService.handleIncomingSms(from, to, body, messageId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Send email via AWS SES.
+     */
+    @PostMapping("/email")
+    public ResponseEntity<SesService.EmailResponse> sendEmail(
+            @RequestBody EmailRequest req) {
+        SesService.EmailResponse response = communicationService.sendEmail(req.toAddress(), req.subject(), req.body());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Send push notification via AWS Pinpoint.
+     */
+    @PostMapping("/push")
+    public ResponseEntity<PushResponse> sendPushNotification(
+            @RequestBody PushRequest req) {
+        PushResponse response = communicationService.sendPushNotification(
+                req.deviceToken(), req.title(), req.body());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Create video meeting via AWS Chime.
+     */
+    @PostMapping("/video/meeting")
+    public ResponseEntity<ChimeService.MeetingResponse> createVideoMeeting(
+            @RequestBody VideoMeetingRequest req) {
+        ChimeService.MeetingResponse response = communicationService.createVideoMeeting(
+                req.stylistId(), req.clientId(), req.consultationType());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * End video meeting.
+     */
+    @DeleteMapping("/video/meeting/{meetingId}")
+    public ResponseEntity<Void> endVideoMeeting(@PathVariable String meetingId) {
+        communicationService.endVideoMeeting(meetingId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Get meeting details.
+     */
+    @GetMapping("/video/meeting/{meetingId}")
+    public ResponseEntity<ChimeService.MeetingDetails> getMeeting(@PathVariable String meetingId) {
+        ChimeService.MeetingDetails details = chimeService.getMeeting(meetingId);
+        return ResponseEntity.ok(details);
+    }
+
+    /**
+     * Get meeting attendees.
+     */
+    @GetMapping("/video/meeting/{meetingId}/attendees")
+    public ResponseEntity<java.util.List<ChimeService.AttendeeInfo>> getMeetingAttendees(@PathVariable String meetingId) {
+        var attendees = chimeService.listAttendees(meetingId);
+        return ResponseEntity.ok(attendees);
+    }
+
+    /**
+     * Create attendee for meeting.
+     */
+    @PostMapping("/video/meeting/{meetingId}/attendee")
+    public ResponseEntity<ChimeService.AttendeeResponse> createAttendee(
+            @PathVariable String meetingId,
+            @RequestBody AttendeeRequest req) {
+        ChimeService.AttendeeResponse response = chimeService.createAttendee(meetingId, req.attendeeId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Send bulk SMS.
+     */
+    @PostMapping("/sms/bulk")
+    public ResponseEntity<BulkSmsResponse> sendBulkSms(
+            @RequestBody BulkSmsRequest req) {
+        BulkSmsResponse response = pinpointService.sendBulkSms(req.phoneNumbers(), req.message());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Send bulk email.
+     */
+    @PostMapping("/email/bulk")
+    public ResponseEntity<SesService.BulkEmailResponse> sendBulkEmail(
+            @RequestBody BulkEmailRequest req) {
+        SesService.BulkEmailResponse response = sesService.sendBulkEmail(req.toAddresses(), req.subject(), req.body());
+        return ResponseEntity.ok(response);
+    }
+
+    // Request/Response DTOs
+    public record EmailRequest(String toAddress, String subject, String body) {}
+    public record PushRequest(String deviceToken, String title, String body) {}
+    public record VideoMeetingRequest(String stylistId, String clientId, String consultationType) {}
+    public record AttendeeRequest(String attendeeId) {}
+    public record BulkSmsRequest(java.util.List<String> phoneNumbers, String message) {}
+    public record BulkEmailRequest(java.util.List<String> toAddresses, String subject, String body) {}
+}

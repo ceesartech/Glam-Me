@@ -18,11 +18,14 @@ repositories {
 
 dependencies {
     implementation project(':common')
-    implementation project(':matching-service')
 
-    // Spring Web & JPA
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Lombok annotations
     compileOnly 'org.projectlombok:lombok:1.18.28'
@@ -31,9 +34,17 @@ dependencies {
     // Jakarta
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
+    // Jackson datatype for JSON serialization of nested DTOs
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+
+    // PostgreSQL driver
+    runtimeOnly 'org.postgresql:postgresql:42.7.2'
+
     // Stripe SDK
-//    implementation 'com.stripe:stripe-java:20.156.0'
     implementation "com.stripe:stripe-java:29.0.0"
+
+    // Calendar integration
+    implementation 'org.mnode.ical4j:ical4j:3.2.9'
 
     // Google Calendar API
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.33.1'
@@ -42,17 +53,10 @@ dependencies {
     implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
     implementation 'com.google.http-client:google-http-client-jackson2:1.32.1'
 
-
-    // ICS generation (for Apple calendar download)
-//    implementation 'org.mnode.ical4j:ical4j:3.3.0'
-//    implementation 'org.ical4j:ical4j:3.7.0'
-
-    runtimeOnly 'org.postgresql:postgresql:42.7.2'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mockito:mockito-core:latest.release'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // If using JUnit 5
-    testImplementation 'org.mockito:mockito-junit-jupiter:latest.release' // For JUnit 5 and Mockito annotations
+    testImplementation 'org.mockito:mockito-core:5.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
 }
 
 tasks.test {

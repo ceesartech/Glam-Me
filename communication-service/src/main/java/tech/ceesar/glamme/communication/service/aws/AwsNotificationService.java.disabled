@@ -1,0 +1,142 @@
+package tech.ceesar.glamme.communication.service.aws;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.pinpoint.PinpointClient;
+import software.amazon.awssdk.services.pinpoint.model.*;
+import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.*;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
+
+/**
+ * AWS-based notification service using SES, SNS, and Pinpoint
+ * Replaces Twilio functionality with native AWS services
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AwsNotificationService {
+
+    private final SesClient sesClient;
+    private final SnsClient snsClient;
+    private final PinpointClient pinpointClient;
+
+    /**
+     * Send email using AWS SES
+     */
+    public void sendEmail(String to, String subject, String body) {
+        try {
+            SendEmailRequest request = SendEmailRequest.builder()
+                    .destination(Destination.builder()
+                            .toAddresses(to)
+                            .build())
+                    .message(Message.builder()
+                            .subject(Content.builder()
+                                    .data(subject)
+                                    .build())
+                            .body(Body.builder()
+                                    .text(Content.builder()
+                                            .data(body)
+                                            .build())
+                                    .build())
+                            .build())
+                    .source("noreply@glamme.com") // Replace with verified domain
+                    .build();
+
+            SendEmailResponse response = sesClient.sendEmail(request);
+            log.info("Email sent successfully: {}", response.messageId());
+
+        } catch (Exception e) {
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
+            throw new RuntimeException("Email sending failed", e);
+        }
+    }
+
+    /**
+     * Send SMS using AWS SNS
+     */
+    public void sendSms(String phoneNumber, String message) {
+        try {
+            PublishRequest request = PublishRequest.builder()
+                    .phoneNumber(phoneNumber)
+                    .message(message)
+                    .build();
+
+            PublishResponse response = snsClient.publish(request);
+            log.info("SMS sent successfully: {}", response.messageId());
+
+        } catch (Exception e) {
+            log.error("Failed to send SMS to {}: {}", phoneNumber, e.getMessage());
+            throw new RuntimeException("SMS sending failed", e);
+        }
+    }
+
+    /**
+     * Send push notification using AWS Pinpoint
+     */
+    public void sendPushNotification(String deviceToken, String title, String body) {
+        try {
+            // This is a simplified implementation
+            // In production, you'd need to register the device token first
+            log.info("Push notification would be sent to device token: {} with title: {}", deviceToken, title);
+            log.debug("Push notification body: {}", body);
+
+            // TODO: Implement actual Pinpoint push notification sending
+            // This would involve creating a campaign or sending direct messages
+
+        } catch (Exception e) {
+            log.error("Failed to send push notification: {}", e.getMessage());
+            throw new RuntimeException("Push notification failed", e);
+        }
+    }
+
+    /**
+     * Send booking confirmation notification
+     */
+    public void sendBookingConfirmation(String email, String phone, String bookingDetails) {
+        String subject = "Booking Confirmation - GlamMe";
+        String emailBody = String.format("""
+                Dear Customer,
+
+                Your booking has been confirmed!
+
+                Booking Details:
+                %s
+
+                Thank you for choosing GlamMe!
+
+                Best regards,
+                GlamMe Team
+                """, bookingDetails);
+
+        String smsBody = "Your GlamMe booking has been confirmed! Details: " + bookingDetails.substring(0, 100) + "...";
+
+        sendEmail(email, subject, emailBody);
+        sendSms(phone, smsBody);
+    }
+
+    /**
+     * Send stylist match notification
+     */
+    public void sendMatchNotification(String email, String phone, String stylistName, String serviceType) {
+        String subject = "New Match Available - GlamMe";
+        String emailBody = String.format("""
+                Great news!
+
+                You have a new match with %s for %s service.
+
+                Please log in to your GlamMe account to view details and book your appointment.
+
+                Best regards,
+                GlamMe Team
+                """, stylistName, serviceType);
+
+        String smsBody = String.format("New match with %s for %s! Check your GlamMe app.", stylistName, serviceType);
+
+        sendEmail(email, subject, emailBody);
+        sendSms(phone, smsBody);
+    }
+}

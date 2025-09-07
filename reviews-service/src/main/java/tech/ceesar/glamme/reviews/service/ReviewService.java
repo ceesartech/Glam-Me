@@ -41,13 +41,11 @@ public class ReviewService {
         Page<Review> reviews = reviewRepository.findByStylistId(stylistId, pageable);
         var dtos = reviews.stream().map(this::map).toList();
 
-        return new PagedResponse<>(
+        return PagedResponse.of(
                 dtos,
                 reviews.getNumber(),
                 reviews.getSize(),
-                reviews.getTotalElements(),
-                reviews.getTotalPages(),
-                reviews.isLast()
+                reviews.getTotalElements()
         );
     }
 

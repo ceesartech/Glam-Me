@@ -1,51 +1,135 @@
 package tech.ceesar.glamme.booking.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import tech.ceesar.glamme.booking.enums.BookingStatus;
-import tech.ceesar.glamme.booking.enums.PaymentStatus;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Set;
 
 @Entity
 @Table(name = "bookings")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Booking {
+    
     @Id
-    @GeneratedValue
-    private UUID bookingId;
-
-    @Column(nullable = false)
-    private UUID customerId;
-
-    @Column(nullable = false)
-    private UUID stylistId;
-
-    @Column(nullable = false)
-    private UUID offeringId;
-
-    @Column(nullable = true)
-    private String calendarEventId;
-
-    @Column(nullable = false)
-    private LocalDateTime scheduledTime;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "booking_id", nullable = false, unique = true)
+    private String bookingId;
+    
+    @Column(name = "customer_id", nullable = false)
+    private String customerId;
+    
+    @Column(name = "stylist_id", nullable = false)
+    private String stylistId;
+    
+    @Column(name = "service_id")
+    private String serviceId;
+    
+    @Column(name = "service_name", nullable = false)
+    private String serviceName;
+    
+    @Column(name = "service_description", columnDefinition = "TEXT")
+    private String serviceDescription;
+    
+    @Column(name = "appointment_date", nullable = false)
+    private LocalDateTime appointmentDate;
+    
+    @Column(name = "duration_minutes", nullable = false)
+    private Integer durationMinutes;
+    
+    @Column(name = "price", precision = 10, scale = 2, nullable = false)
+    private BigDecimal price;
+    
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private BookingStatus bookingStatus;
-
+    private Status status;
+    
+    @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private PaymentStatus paymentStatus;
-
+    
+    @Column(name = "payment_intent_id")
+    private String paymentIntentId;
+    
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+    
+    @Column(name = "special_requests", columnDefinition = "TEXT")
+    private String specialRequests;
+    
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "booking_addons", joinColumns = @JoinColumn(name = "booking_id"))
+    @Column(name = "addon")
+    private Set<String> addons;
+    
+    @Column(name = "location_type")
+    @Enumerated(EnumType.STRING)
+    private LocationType locationType;
+    
+    @Column(name = "location_address")
+    private String locationAddress;
+    
+    @Column(name = "location_latitude", precision = 10, scale = 8)
+    private BigDecimal locationLatitude;
+    
+    @Column(name = "location_longitude", precision = 11, scale = 8)
+    private BigDecimal locationLongitude;
+    
+    @Column(name = "calendar_event_id")
+    private String calendarEventId;
+    
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
+    
+    @Column(name = "apple_calendar_url")
+    private String appleCalendarUrl;
+    
+    @Column(name = "confirmation_code")
+    private String confirmationCode;
+    
+    @Column(name = "cancellation_reason")
+    private String cancellationReason;
+    
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+    
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+    
+    @Column(name = "reminder_sent")
+    private Boolean reminderSent;
+    
+    @Column(name = "confirmation_sent")
+    private Boolean confirmationSent;
+    
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    public enum Status {
+        PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW, RESCHEDULED
+    }
+    
+    public enum PaymentStatus {
+        PENDING, HELD, CAPTURED, REFUNDED, FAILED
+    }
+    
+    public enum LocationType {
+        SALON, HOME, MOBILE, VIRTUAL
+    }
 }

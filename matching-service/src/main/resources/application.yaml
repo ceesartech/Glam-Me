@@ -1,21 +1,77 @@
 server:
-  port: 8083
+  port: 8082
 
 spring:
+  application:
+    name: matching-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:aws}
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:matchingdb}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glamme}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
-
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
 
-# URL for calling auth-service’s ADMIN endpoint
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+aws:
+  region: ${AWS_REGION:us-east-1}
+  opensearch:
+    endpoint: ${OPENSEARCH_ENDPOINT}
+    collection-name: ${OPENSEARCH_COLLECTION:stylists}
+  eventbridge:
+    bus-name: ${EVENTBRIDGE_BUS_NAME:glamme-bus}
+  secrets:
+    database-arn: ${DATABASE_SECRET_ARN:}
+    opensearch-arn: ${OPENSEARCH_SECRET_ARN:}
+
+matching:
+  algorithm:
+    elo:
+      initial-rating: 1500
+      k-factor: 32
+      min-rating: 100
+      max-rating: 3000
+    gale-shapley:
+      max-iterations: 100
+    geo:
+      max-distance-km: 50
+      distance-weight: 0.3
+    price:
+      price-weight: 0.2
+    availability:
+      availability-weight: 0.3
+    rating:
+      rating-weight: 0.2
+  cache:
+    stylist-scores-ttl: 3600 # 1 hour
+    customer-preferences-ttl: 1800 # 30 minutes
+    geo-cache-ttl: 300 # 5 minutes
+
+logging:
+  level:
+    tech.ceesar.glamme: INFO
+    software.amazon.awssdk: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

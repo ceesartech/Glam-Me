@@ -1,0 +1,338 @@
+package tech.ceesar.glamme.communication.service.aws;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.*;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class SesService {
+
+    private final SesClient sesClient;
+
+    @Value("${aws.ses.from-email:noreply@glamme.com}")
+    private String fromEmail;
+
+    /**
+     * Send simple text email
+     */
+    public EmailResponse sendEmail(String toAddress, String subject, String body) {
+        try {
+            SendEmailRequest request = SendEmailRequest.builder()
+                    .source(fromEmail)
+                    .destination(Destination.builder()
+                            .toAddresses(toAddress)
+                            .build())
+                    .message(Message.builder()
+                            .subject(Content.builder()
+                                    .data(subject)
+                                    .build())
+                            .body(Body.builder()
+                                    .text(Content.builder()
+                                            .data(body)
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
+
+            SendEmailResponse response = sesClient.sendEmail(request);
+
+            log.info("Sent email to {}: messageId={}", toAddress, response.messageId());
+
+            return EmailResponse.builder()
+                    .messageId(response.messageId())
+                    .toAddress(toAddress)
+                    .status("SENT")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to send email to {}", toAddress, e);
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    /**
+     * Send HTML email
+     */
+    public EmailResponse sendHtmlEmail(String toAddress, String subject, String htmlBody, String textBody) {
+        try {
+            SendEmailRequest request = SendEmailRequest.builder()
+                    .source(fromEmail)
+                    .destination(Destination.builder()
+                            .toAddresses(toAddress)
+                            .build())
+                    .message(Message.builder()
+                            .subject(Content.builder()
+                                    .data(subject)
+                                    .build())
+                            .body(Body.builder()
+                                    .html(Content.builder()
+                                            .data(htmlBody)
+                                            .charset("UTF-8")
+                                            .build())
+                                    .text(Content.builder()
+                                            .data(textBody)
+                                            .charset("UTF-8")
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
+
+            SendEmailResponse response = sesClient.sendEmail(request);
+
+            log.info("Sent HTML email to {}: messageId={}", toAddress, response.messageId());
+
+            return EmailResponse.builder()
+                    .messageId(response.messageId())
+                    .toAddress(toAddress)
+                    .status("SENT")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to send HTML email to {}", toAddress, e);
+            throw new RuntimeException("Failed to send HTML email", e);
+        }
+    }
+
+    /**
+     * Send email to multiple recipients
+     */
+    public BulkEmailResponse sendBulkEmail(List<String> toAddresses, String subject, String body) {
+        BulkEmailResponse.BulkEmailResponseBuilder responseBuilder = BulkEmailResponse.builder();
+
+        for (String toAddress : toAddresses) {
+            try {
+                EmailResponse emailResponse = sendEmail(toAddress, subject, body);
+                responseBuilder.success(emailResponse);
+            } catch (Exception e) {
+                responseBuilder.failure(BulkEmailResponse.Failure.builder()
+                        .email(toAddress)
+                        .error(e.getMessage())
+                        .build());
+            }
+        }
+
+        return responseBuilder.build();
+    }
+
+    /**
+     * Send templated email
+     */
+    public EmailResponse sendTemplatedEmail(String toAddress, String templateName,
+                                          Map<String, String> templateData) {
+        try {
+            String templateJson = objectMapper.writeValueAsString(templateData);
+
+            SendTemplatedEmailRequest request = SendTemplatedEmailRequest.builder()
+                    .source(fromEmail)
+                    .destination(Destination.builder()
+                            .toAddresses(toAddress)
+                            .build())
+                    .template(templateName)
+                    .templateData(templateJson)
+                    .build();
+
+            SendTemplatedEmailResponse response = sesClient.sendTemplatedEmail(request);
+
+            log.info("Sent templated email to {} using template {}: messageId={}",
+                    toAddress, templateName, response.messageId());
+
+            return EmailResponse.builder()
+                    .messageId(response.messageId())
+                    .toAddress(toAddress)
+                    .status("SENT")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to send templated email to {}", toAddress, e);
+            throw new RuntimeException("Failed to send templated email", e);
+        }
+    }
+
+    /**
+     * Verify email address for sending
+     */
+    public void verifyEmailAddress(String emailAddress) {
+        try {
+            VerifyEmailIdentityRequest request = VerifyEmailIdentityRequest.builder()
+                    .emailAddress(emailAddress)
+                    .build();
+
+            sesClient.verifyEmailIdentity(request);
+
+            log.info("Verification email sent to: {}", emailAddress);
+
+        } catch (Exception e) {
+            log.error("Failed to verify email address: {}", emailAddress, e);
+            throw new RuntimeException("Failed to verify email address", e);
+        }
+    }
+
+    /**
+     * Check if email address is verified
+     */
+    public boolean isEmailVerified(String emailAddress) {
+        try {
+            GetIdentityVerificationAttributesRequest request = GetIdentityVerificationAttributesRequest.builder()
+                    .identities(emailAddress)
+                    .build();
+
+            GetIdentityVerificationAttributesResponse response = sesClient.getIdentityVerificationAttributes(request);
+
+            VerificationAttributes attributes = response.verificationAttributes().get(emailAddress);
+            return attributes != null && "Success".equals(attributes.verificationStatus().toString());
+
+        } catch (Exception e) {
+            log.error("Failed to check email verification status: {}", emailAddress, e);
+            return false;
+        }
+    }
+
+    /**
+     * Create email template
+     */
+    public void createEmailTemplate(String templateName, String subject, String htmlBody, String textBody) {
+        try {
+            CreateTemplateRequest request = CreateTemplateRequest.builder()
+                    .template(Template.builder()
+                            .templateName(templateName)
+                            .subjectPart(subject)
+                            .htmlPart(htmlBody)
+                            .textPart(textBody)
+                            .build())
+                    .build();
+
+            sesClient.createTemplate(request);
+
+            log.info("Created email template: {}", templateName);
+
+        } catch (Exception e) {
+            log.error("Failed to create email template: {}", templateName, e);
+            throw new RuntimeException("Failed to create email template", e);
+        }
+    }
+
+    /**
+     * Update email template
+     */
+    public void updateEmailTemplate(String templateName, String subject, String htmlBody, String textBody) {
+        try {
+            UpdateTemplateRequest request = UpdateTemplateRequest.builder()
+                    .template(Template.builder()
+                            .templateName(templateName)
+                            .subjectPart(subject)
+                            .htmlPart(htmlBody)
+                            .textPart(textBody)
+                            .build())
+                    .build();
+
+            sesClient.updateTemplate(request);
+
+            log.info("Updated email template: {}", templateName);
+
+        } catch (Exception e) {
+            log.error("Failed to update email template: {}", templateName, e);
+            throw new RuntimeException("Failed to update email template", e);
+        }
+    }
+
+    /**
+     * Delete email template
+     */
+    public void deleteEmailTemplate(String templateName) {
+        try {
+            DeleteTemplateRequest request = DeleteTemplateRequest.builder()
+                    .templateName(templateName)
+                    .build();
+
+            sesClient.deleteTemplate(request);
+
+            log.info("Deleted email template: {}", templateName);
+
+        } catch (Exception e) {
+            log.error("Failed to delete email template: {}", templateName, e);
+            throw new RuntimeException("Failed to delete email template", e);
+        }
+    }
+
+    /**
+     * Get email sending statistics
+     */
+    public EmailStats getEmailStats() {
+        try {
+            GetSendStatisticsRequest request = GetSendStatisticsRequest.builder().build();
+            GetSendStatisticsResponse response = sesClient.getSendStatistics(request);
+
+            // Aggregate statistics from the last 24 hours
+            long totalSent = response.sendDataPoints().stream()
+                    .mapToLong(SendDataPoint::deliveryAttempts)
+                    .sum();
+
+            long bounces = response.sendDataPoints().stream()
+                    .mapToLong(SendDataPoint::bounces)
+                    .sum();
+
+            long complaints = response.sendDataPoints().stream()
+                    .mapToLong(SendDataPoint::complaints)
+                    .sum();
+
+            long rejects = response.sendDataPoints().stream()
+                    .mapToLong(SendDataPoint::rejects)
+                    .sum();
+
+            return EmailStats.builder()
+                    .totalSent(totalSent)
+                    .bounces(bounces)
+                    .complaints(complaints)
+                    .rejects(rejects)
+                    .deliveryRate(totalSent > 0 ? ((double) (totalSent - bounces - rejects) / totalSent) * 100 : 0)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to get email statistics", e);
+            return EmailStats.builder().build();
+        }
+    }
+
+    // Helper method - need to import ObjectMapper
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    // Response DTOs
+    public record EmailResponse(String messageId, String toAddress, String status) {}
+
+    public record EmailStats(Long totalSent, Long bounces, Long complaints, Long rejects, Double deliveryRate) {}
+
+    public record BulkEmailResponse(List<EmailResponse> successes, List<Failure> failures) {
+        public static BulkEmailResponseBuilder builder() {
+            return new BulkEmailResponseBuilder();
+        }
+
+        public static class BulkEmailResponseBuilder {
+            private final List<EmailResponse> successes = new java.util.ArrayList<>();
+            private final List<Failure> failures = new java.util.ArrayList<>();
+
+            public BulkEmailResponseBuilder success(EmailResponse response) {
+                this.successes.add(response);
+                return this;
+            }
+
+            public BulkEmailResponseBuilder failure(Failure failure) {
+                this.failures.add(failure);
+                return this;
+            }
+
+            public BulkEmailResponse build() {
+                return new BulkEmailResponse(successes, failures);
+            }
+        }
+
+        public record Failure(String email, String error) {}
+    }
+}

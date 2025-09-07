@@ -28,7 +28,7 @@ public class OrderQueryService {
     public OrderResponse getOrderById(UUID orderId) {
         Order order = orderRepo.findById(orderId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Order", "id", orderId)
+                        new ResourceNotFoundException("Order", orderId.toString())
                 );
         return mapToDto(order);
     }
