@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-// import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient; // Commented out - not available in this SDK version
-// import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
-// import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
+import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+import software.amazon.awssdk.core.SdkBytes;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -32,7 +35,7 @@ public class ImageJobWorker {
 
     private final SqsClient sqsClient;
     private final S3Client s3Client;
-    // private final BedrockRuntimeClient bedrockClient;
+    private final BedrockRuntimeClient bedrockClient;
     private final ImageJobRepository imageJobRepository;
     private final EventPublisher eventPublisher;
 
@@ -160,10 +163,24 @@ public class ImageJobWorker {
                 }
                 """, Base64.getEncoder().encodeToString(subjectImage), job.getPrompt());
 
-        // TODO: Replace with OpenAI or other AI service implementation
-        // For now, return a placeholder image URL
-        log.info("AI image generation would be implemented here using OpenAI or similar service");
-        return saveImageOutput(job, "placeholder-image-url-" + job.getId());
+        // Call Bedrock for inpainting
+        try {
+            InvokeModelRequest invokeRequest = InvokeModelRequest.builder()
+                    .modelId("amazon.titan-image-generator-v1")
+                    .body(SdkBytes.fromUtf8String(requestBody))
+                    .build();
+
+            InvokeModelResponse response = bedrockClient.invokeModel(invokeRequest);
+            String responseBody = response.body().asUtf8String();
+            
+            // Parse response and extract generated image
+            // Implementation depends on Bedrock response format
+            return processBedrockImageResponse(job, responseBody);
+            
+        } catch (Exception e) {
+            log.error("Failed to call Bedrock for inpainting", e);
+            throw new RuntimeException("Image generation failed", e);
+        }
     }
 
     private String processStyleTransferJob(ImageJob job) throws Exception {
@@ -187,10 +204,22 @@ public class ImageJobWorker {
                 """, Base64.getEncoder().encodeToString(subjectImage),
                    Base64.getEncoder().encodeToString(styleImage), job.getPrompt());
 
-        // TODO: Replace with OpenAI or other AI service implementation
-        // For now, return a placeholder image URL
-        log.info("AI style transfer would be implemented here using OpenAI or similar service");
-        return saveImageOutput(job, "placeholder-style-transfer-url-" + job.getId());
+        // Call Bedrock for style transfer using Stability AI
+        try {
+            InvokeModelRequest invokeRequest = InvokeModelRequest.builder()
+                    .modelId("stability.stable-image-ultra-v1:0")
+                    .body(SdkBytes.fromUtf8String(requestBody))
+                    .build();
+
+            InvokeModelResponse response = bedrockClient.invokeModel(invokeRequest);
+            String responseBody = response.body().asUtf8String();
+            
+            return processBedrockImageResponse(job, responseBody);
+            
+        } catch (Exception e) {
+            log.error("Failed to call Bedrock for style transfer", e);
+            throw new RuntimeException("Style transfer failed", e);
+        }
     }
 
     private String processGenerateJob(ImageJob job) throws Exception {
@@ -210,10 +239,22 @@ public class ImageJobWorker {
                 }
                 """, job.getPrompt());
 
-        // TODO: Replace with OpenAI or other AI service implementation
-        // For now, return a placeholder image URL
-        log.info("AI text-to-image generation would be implemented here using OpenAI or similar service");
-        return saveImageOutput(job, "placeholder-text-to-image-url-" + job.getId());
+        // Call Bedrock for text-to-image generation
+        try {
+            InvokeModelRequest invokeRequest = InvokeModelRequest.builder()
+                    .modelId("amazon.titan-image-generator-v1")
+                    .body(SdkBytes.fromUtf8String(requestBody))
+                    .build();
+
+            InvokeModelResponse response = bedrockClient.invokeModel(invokeRequest);
+            String responseBody = response.body().asUtf8String();
+            
+            return processBedrockImageResponse(job, responseBody);
+            
+        } catch (Exception e) {
+            log.error("Failed to call Bedrock for text-to-image", e);
+            throw new RuntimeException("Text-to-image generation failed", e);
+        }
     }
 
     private byte[] getImageFromS3(String key) throws Exception {
@@ -227,6 +268,38 @@ public class ImageJobWorker {
             inputStream.transferTo(outputStream);
             return outputStream.toByteArray();
         }
+    }
+
+    private String processBedrockImageResponse(ImageJob job, String responseBody) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode response = mapper.readTree(responseBody);
+        
+        // Extract base64 image from Bedrock response
+        String base64Image = null;
+        if (response.has("images") && response.get("images").isArray()) {
+            base64Image = response.get("images").get(0).asText();
+        } else if (response.has("image")) {
+            base64Image = response.get("image").asText();
+        }
+        
+        if (base64Image == null) {
+            throw new Exception("No image found in Bedrock response");
+        }
+        
+        // Decode base64 image
+        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+        
+        // Save to S3
+        String outputKey = "outputs/" + job.getId() + ".png";
+        PutObjectRequest putRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(outputKey)
+                .build();
+        
+        s3Client.putObject(putRequest, 
+            software.amazon.awssdk.core.sync.RequestBody.fromBytes(imageBytes));
+        
+        return outputKey;
     }
 
     private String saveImageOutput(ImageJob job, String bedrockResponse) throws Exception {

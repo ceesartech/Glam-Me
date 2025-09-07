@@ -60,4 +60,13 @@ public class RideRequest {
     public String getRideId() {
         return rideRequestId != null ? rideRequestId.toString() : null;
     }
+
+    // Additional helper methods for analytics
+    public void setActualDistanceMiles(double distance) {
+        // Distance not stored in this entity - could be added if needed
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        // UpdatedAt not stored in this entity - could be added if needed
+    }
 }

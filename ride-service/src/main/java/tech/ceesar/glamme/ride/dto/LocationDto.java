@@ -31,4 +31,13 @@ public class LocationDto {
     public void setLongitude(double longitude) {
         this.longitude = BigDecimal.valueOf(longitude);
     }
+
+    // Get raw BigDecimal values
+    public BigDecimal latitude() {
+        return latitude;
+    }
+
+    public BigDecimal longitude() {
+        return longitude;
+    }
 }

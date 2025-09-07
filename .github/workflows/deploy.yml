@@ -8,14 +8,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy to'
+        description: 'Target environment'
         required: true
         default: 'dev'
         type: choice
         options:
-          - dev
-          - staging
-          - prod
+        - dev
+        - staging
+        - prod
 
 env:
   AWS_REGION: us-east-1
@@ -23,297 +23,290 @@ env:
   ECR_REGISTRY: 476114151082.dkr.ecr.us-east-1.amazonaws.com
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   test:
     name: Test & Build
     runs-on: ubuntu-latest
+    outputs:
+      build-cache-key: ${{ steps.cache-key.outputs.key }}
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'corretto'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+    - name: Generate cache key
+      id: cache-key
+      run: echo "key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
 
-      - name: Build common module
-        run: ./gradlew :common:build -x test
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ steps.cache-key.outputs.key }}
+        restore-keys: |
+          gradle-
 
-      - name: Test auth-service
-        run: ./gradlew :auth-service:test
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Test image-service
-        run: ./gradlew :image-service:test
+    - name: Build common module
+      run: ./gradlew :common:build
 
-      - name: Test matching-service
-        run: ./gradlew :matching-service:test
+    - name: Run tests
+      run: ./gradlew test --parallel --continue
 
-      - name: Test social-service
-        run: ./gradlew :social-service:test
+    - name: Build all services
+      run: ./gradlew build -x test --parallel
 
-      - name: Test shopping-service
-        run: ./gradlew :shopping-service:test
-
-      - name: Test communication-service
-        run: ./gradlew :communication-service:test
-
-      - name: Build all services
-        run: ./gradlew build -x test
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: services-jars
-          path: |
-            */build/libs/*.jar
-            !*/build/libs/*-plain.jar
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          */build/libs/*.jar
+          gradlew
+          gradlew.bat
+          gradle/
+          build.gradle
+          settings.gradle
+        retention-days: 1
 
   build-and-push:
-    name: Build & Push Docker Images
-    needs: test
+    name: Build & Push Images
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    
+    strategy:
+      matrix:
+        service: [auth-service, image-service, matching-service, social-service, shopping-service, communication-service, booking-service, reviews-service, ride-service]
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: services-jars
-          path: services/
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::476114151082:role/GlamMe-CICD-Role
-          aws-region: us-east-1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v3
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Build and push auth-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./auth-service
-          file: ./auth-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/auth-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/auth-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    - name: Build and push Docker image
+      env:
+        ECR_REPOSITORY: glamme/${{ matrix.service }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Create ECR repository if it doesn't exist
+        aws ecr describe-repositories --repository-names $ECR_REPOSITORY || \
+        aws ecr create-repository --repository-name $ECR_REPOSITORY
 
-      - name: Build and push image-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./image-service
-          file: ./image-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/image-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/image-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        # Build and push the Docker image
+        docker build -f Dockerfile.${{ matrix.service }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Build and push matching-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./matching-service
-          file: ./matching-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/matching-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/matching-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push social-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./social-service
-          file: ./social-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/social-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/social-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push shopping-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./shopping-service
-          file: ./shopping-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/shopping-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/shopping-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push communication-service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./communication-service
-          file: ./communication-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/glamme/communication-service:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/glamme/communication-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Verify ECR images
-        run: |
-          aws ecr describe-images --repository-name glamme/auth-service --query 'imageDetails[0].imageTags'
-          aws ecr describe-images --repository-name glamme/image-service --query 'imageDetails[0].imageTags'
-          aws ecr describe-images --repository-name glamme/matching-service --query 'imageDetails[0].imageTags'
-          aws ecr describe-images --repository-name glamme/social-service --query 'imageDetails[0].imageTags'
-          aws ecr describe-images --repository-name glamme/shopping-service --query 'imageDetails[0].imageTags'
-          aws ecr describe-images --repository-name glamme/communication-service --query 'imageDetails[0].imageTags'
+    - name: Verify ECR image
+      run: |
+        aws ecr describe-images --repository-name glamme/${{ matrix.service }} --image-ids imageTag=${{ github.sha }}
 
   deploy-infrastructure:
     name: Deploy Infrastructure
-    needs: build-and-push
     runs-on: ubuntu-latest
+    needs: [test, build-and-push]
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: read
-      id-token: write
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::476114151082:role/GlamMe-CICD-Role
-          aws-region: us-east-1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'corretto'
 
-      - name: Set up CDK
-        run: |
-          npm install -g aws-cdk
-          cdk --version
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: CDK Bootstrap (if needed)
-        run: |
-          cd cdk
-          cdk bootstrap aws://476114151082/us-east-1 || echo "Bootstrap already exists"
+    - name: Install AWS CDK
+      run: npm install -g aws-cdk
 
-      - name: Deploy CDK Infrastructure
-        run: |
-          cd cdk
-          cdk deploy GlammeVpcStack --require-approval never --ci
+    - name: CDK Bootstrap (if needed)
+      run: |
+        cd cdk
+        cdk bootstrap aws://${{ env.ACCOUNT_ID }}/${{ env.AWS_REGION }} || true
 
-      - name: Get infrastructure outputs
-        id: infra-outputs
-        run: |
-          VPC_ID=$(aws cloudformation describe-stacks --stack-name GlammeVpcStack --query 'Stacks[0].Outputs[?OutputKey==`VpcId`].OutputValue' --output text)
-          DB_ENDPOINT=$(aws cloudformation describe-stacks --stack-name GlammeVpcStack --query 'Stacks[0].Outputs[?OutputKey==`DatabaseEndpoint`].OutputValue' --output text)
-          REDIS_ENDPOINT=$(aws cloudformation describe-stacks --stack-name GlammeVpcStack --query 'Stacks[0].Outputs[?OutputKey==`RedisEndpoint`].OutputValue' --output text)
+    - name: Build CDK
+      run: |
+        cd cdk
+        chmod +x gradlew
+        ./gradlew build
 
-          echo "vpc-id=$VPC_ID" >> $GITHUB_OUTPUT
-          echo "db-endpoint=$DB_ENDPOINT" >> $GITHUB_OUTPUT
-          echo "redis-endpoint=$REDIS_ENDPOINT" >> $GITHUB_OUTPUT
+    - name: Deploy CDK Infrastructure
+      run: |
+        cd cdk
+        cdk deploy GlammeVpcStack --require-approval never
+
+    - name: Extract infrastructure outputs
+      run: |
+        cd cdk
+        cdk list-outputs GlammeVpcStack > outputs.json
+        cat outputs.json
+
+    - name: Upload CDK outputs
+      uses: actions/upload-artifact@v3
+      with:
+        name: cdk-outputs
+        path: cdk/outputs.json
+        retention-days: 1
 
   deploy-services:
-    name: Deploy ECS Services
-    needs: deploy-infrastructure
+    name: Deploy Services
     runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: read
-      id-token: write
-
+    
+    strategy:
+      matrix:
+        service: [auth-service, image-service, matching-service, social-service, shopping-service, communication-service, booking-service, reviews-service, ride-service]
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::476114151082:role/GlamMe-CICD-Role
-          aws-region: us-east-1
+    - name: Force ECS service deployment
+      run: |
+        # Check if service exists and force new deployment
+        SERVICE_ARN=$(aws ecs describe-services --cluster glamme-cluster --services ${{ matrix.service }} --query 'services[0].serviceArn' --output text 2>/dev/null || echo "None")
+        
+        if [[ "$SERVICE_ARN" != "None" ]]; then
+          echo "Updating existing service: ${{ matrix.service }}"
+          aws ecs update-service \
+            --cluster glamme-cluster \
+            --service ${{ matrix.service }} \
+            --force-new-deployment
+        else
+          echo "Service ${{ matrix.service }} not found - will be created by CDK"
+        fi
 
-      - name: Update ECS Services
-        run: |
-          # Force new deployment of all ECS services
-          aws ecs update-service --cluster glamme-cluster --service auth-service --force-new-deployment
-          aws ecs update-service --cluster glamme-cluster --service image-service --force-new-deployment
-          aws ecs update-service --cluster glamme-cluster --service matching-service --force-new-deployment
-          aws ecs update-service --cluster glamme-cluster --service social-service --force-new-deployment
-          aws ecs update-service --cluster glamme-cluster --service shopping-service --force-new-deployment
-          aws ecs update-service --cluster glamme-cluster --service communication-service --force-new-deployment
-
-      - name: Wait for services to stabilize
-        run: |
-          echo "Waiting for ECS services to stabilize..."
-          aws ecs wait services-stable --cluster glamme-cluster --services auth-service image-service matching-service social-service shopping-service communication-service
-
-      - name: Check service health
-        run: |
-          echo "Checking ECS service status..."
-          aws ecs describe-services --cluster glamme-cluster --services auth-service image-service matching-service social-service shopping-service communication-service --query 'services[*].{name:serviceName,status:status,runningCount:runningCount,desiredCount:desiredCount}'
+    - name: Wait for service to stabilize
+      run: |
+        SERVICE_ARN=$(aws ecs describe-services --cluster glamme-cluster --services ${{ matrix.service }} --query 'services[0].serviceArn' --output text 2>/dev/null || echo "None")
+        
+        if [[ "$SERVICE_ARN" != "None" ]]; then
+          echo "Waiting for service ${{ matrix.service }} to stabilize..."
+          aws ecs wait services-stable --cluster glamme-cluster --services ${{ matrix.service }}
+          echo "Service ${{ matrix.service }} is stable"
+        fi
 
   test-deployment:
     name: Test Deployment
-    needs: deploy-services
     runs-on: ubuntu-latest
+    needs: [deploy-services]
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Run deployment tests
-        run: |
-          echo "Running post-deployment tests..."
-          chmod +x test-deployment.sh
-          ./test-deployment.sh
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Health check all services
-        run: |
-          echo "Performing health checks..."
-          # Get ALB DNS names and test endpoints
-          AUTH_URL=$(aws cloudformation describe-stacks --stack-name GlammeVpcStack --query 'Stacks[0].Outputs[?OutputKey==`AuthServiceUrl`].OutputValue' --output text)
-          if [ -n "$AUTH_URL" ]; then
-            echo "Testing Auth Service: $AUTH_URL"
-            curl -f -s "$AUTH_URL/actuator/health" || echo "Auth service health check failed"
-          fi
+    - name: Download CDK outputs
+      uses: actions/download-artifact@v3
+      with:
+        name: cdk-outputs
+
+    - name: Run deployment verification tests
+      run: |
+        chmod +x test-deployment.sh
+        ./test-deployment.sh
+
+    - name: Health check services
+      run: |
+        echo "Checking ECS cluster health..."
+        aws ecs describe-clusters --clusters glamme-cluster
+        
+        echo "Checking service status..."
+        aws ecs describe-services --cluster glamme-cluster --services auth-service image-service matching-service
+
+    - name: Validate service connectivity
+      run: |
+        echo "Validating ECR repositories..."
+        aws ecr describe-repositories --repository-names glamme/auth-service glamme/image-service glamme/matching-service
+        
+        echo "Checking recent deployments..."
+        aws ecs list-tasks --cluster glamme-cluster
 
   notify:
-    name: Deployment Notification
-    needs: [test-deployment]
+    name: Notification
     runs-on: ubuntu-latest
+    needs: [test-deployment]
     if: always()
-
+    
     steps:
-      - name: Notify deployment status
-        run: |
-          if [ ${{ needs.test-deployment.result }} == 'success' ]; then
-            echo "🎉 GlamMe deployment successful!"
-            echo "✅ All services deployed and healthy"
-          else
-            echo "❌ GlamMe deployment failed"
-            echo "🔍 Check the logs for details"
-          fi
+    - name: Report deployment status
+      run: |
+        if [[ "${{ needs.test-deployment.result }}" == "success" ]]; then
+          echo "🎉 GlamMe deployment completed successfully!"
+          echo "✅ All services are healthy and running"
+          echo "🔗 Check AWS Console for service endpoints"
+        else
+          echo "❌ GlamMe deployment failed or was cancelled"
+          echo "🔍 Check the logs above for details"
+          echo "📞 Review the GitHub Actions logs for troubleshooting"
+        fi
+
+    - name: Create deployment summary
+      run: |
+        echo "## 🚀 GlamMe Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Environment:** ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ needs.test-deployment.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Services Deployed" >> $GITHUB_STEP_SUMMARY
+        echo "- auth-service" >> $GITHUB_STEP_SUMMARY
+        echo "- image-service" >> $GITHUB_STEP_SUMMARY
+        echo "- matching-service" >> $GITHUB_STEP_SUMMARY
+        echo "- social-service" >> $GITHUB_STEP_SUMMARY
+        echo "- shopping-service" >> $GITHUB_STEP_SUMMARY
+        echo "- communication-service" >> $GITHUB_STEP_SUMMARY
+        echo "- booking-service" >> $GITHUB_STEP_SUMMARY
+        echo "- reviews-service" >> $GITHUB_STEP_SUMMARY
+        echo "- ride-service" >> $GITHUB_STEP_SUMMARY

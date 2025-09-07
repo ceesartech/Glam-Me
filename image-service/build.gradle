@@ -36,6 +36,7 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.20.162'
     implementation 'software.amazon.awssdk:sqs:2.20.162'
     implementation 'software.amazon.awssdk:eventbridge:2.20.162'
+    implementation 'software.amazon.awssdk:bedrockruntime:2.21.0'
 
     // Apache Commons IO for file handling
     implementation 'commons-io:commons-io:2.11.0'

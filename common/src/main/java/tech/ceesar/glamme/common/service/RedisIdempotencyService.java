@@ -209,6 +209,20 @@ public class RedisIdempotencyService {
     }
 
     /**
+     * Generate idempotency key for ride operations
+     */
+    public String generateRideIdempotencyKey(String customerId, String pickupLocation, String dropoffLocation) {
+        return "ride:" + customerId + ":" + pickupLocation + ":" + dropoffLocation;
+    }
+
+    /**
+     * Start ride operation with idempotency check
+     */
+    public boolean startRideOperation(String customerId, String idempotencyKey, Object rideData) {
+        return startOperation(idempotencyKey, rideData, Duration.ofMinutes(30));
+    }
+
+    /**
      * Check payment idempotency
      */
     public boolean checkPaymentIdempotency(String userId, String paymentIntentId) {

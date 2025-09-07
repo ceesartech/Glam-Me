@@ -19,24 +19,5 @@ public class RideBookingRequest {
     private String productId;
     private String surgeConfirmationId;
 
-    // Helper methods for compatibility
-    public String getCustomerId() {
-        return customerId;
-    }
 
-    public LocationDto getPickupLocation() {
-        return pickupLocation;
-    }
-
-    public LocationDto getDropoffLocation() {
-        return dropoffLocation;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public String getSurgeConfirmationId() {
-        return surgeConfirmationId;
-    }
 }

@@ -6,17 +6,34 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * WebSocket configuration for real-time ride and driver communication
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic/driver-locations");
-        registry.setApplicationDestinationPrefixes("/app");
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Enable a simple in-memory message broker
+        config.enableSimpleBroker("/topic", "/queue");
+
+        // Set application destination prefix
+        config.setApplicationDestinationPrefixes("/app");
+
+        // Set user destination prefix for private messages
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        // Register WebSocket endpoint with SockJS fallback
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
+
+        // Register additional endpoint without SockJS for native WebSocket clients
+        registry.addEndpoint("/ws-native")
+                .setAllowedOriginPatterns("*");
     }
 }

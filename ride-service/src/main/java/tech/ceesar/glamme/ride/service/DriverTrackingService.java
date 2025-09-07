@@ -11,12 +11,15 @@ import tech.ceesar.glamme.ride.dto.DriverTrackingDto;
 import tech.ceesar.glamme.ride.dto.LocationDto;
 import tech.ceesar.glamme.ride.entity.DriverProfile;
 import tech.ceesar.glamme.ride.entity.Ride;
+import tech.ceesar.glamme.ride.entity.RideRequest;
+import tech.ceesar.glamme.ride.enums.RideStatus;
 import tech.ceesar.glamme.ride.repositories.DriverProfileRepository;
 import tech.ceesar.glamme.ride.repository.RideRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,7 +43,7 @@ public class DriverTrackingService {
     public void updateDriverStatus(String driverId, String status, Boolean available, LocationDto location) {
         log.info("Updating driver status - Driver: {}, Status: {}, Available: {}", driverId, status, available);
 
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
@@ -74,8 +77,8 @@ public class DriverTrackingService {
                             "driverId", driverId,
                             "status", status,
                             "available", available.toString(),
-                            "latitude", location != null ? location.getLatitude().toString() : "0.0",
-                            "longitude", location != null ? location.getLongitude().toString() : "0.0",
+                            "latitude", location != null ? String.valueOf(location.getLatitude()) : "0.0",
+                            "longitude", location != null ? String.valueOf(location.getLongitude()) : "0.0",
                             "timestamp", LocalDateTime.now().toString()
                     ));
 
@@ -90,7 +93,7 @@ public class DriverTrackingService {
     public void startDriverShift(String driverId, String vehicleId) {
         log.info("Starting driver shift - Driver: {}, Vehicle: {}", driverId, vehicleId);
 
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
@@ -124,7 +127,7 @@ public class DriverTrackingService {
     public void endDriverShift(String driverId) {
         log.info("Ending driver shift - Driver: {}", driverId);
 
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
@@ -161,13 +164,13 @@ public class DriverTrackingService {
      * Get comprehensive driver status
      */
     public Optional<DriverTrackingDto> getDriverStatus(String driverId) {
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
             // Get current ride if any
             String currentRideId = null;
-            List<Ride> activeRides = rideRepository.findByDriverIdAndStatus(driverId, Ride.Status.STARTED);
+            List<RideRequest> activeRides = rideRepository.findByDriverIdAndStatus(driverId, RideStatus.STARTED.toString());
             if (!activeRides.isEmpty()) {
                 currentRideId = activeRides.get(0).getRideId();
             }
@@ -176,8 +179,8 @@ public class DriverTrackingService {
                     .driverId(driverId)
                     .rideId(currentRideId)
                     .currentLocation(LocationDto.builder()
-                            .latitude(driver.getCurrentLatitude())
-                            .longitude(driver.getCurrentLongitude())
+                            .latitude(BigDecimal.valueOf(driver.getCurrentLatitude()))
+                            .longitude(BigDecimal.valueOf(driver.getCurrentLongitude()))
                             .build())
                     .status(driver.getAvailable() ? "AVAILABLE" : "BUSY")
                     .lastUpdated(driver.getLastLocationUpdate())
@@ -210,14 +213,14 @@ public class DriverTrackingService {
                 .filter(driver -> isWithinRadius(
                         latitude.doubleValue(),
                         longitude.doubleValue(),
-                        driver.getCurrentLatitude().doubleValue(),
-                        driver.getCurrentLongitude().doubleValue(),
+                        driver.getCurrentLatitude(),
+                        driver.getCurrentLongitude(),
                         radiusKm))
                 .map(driver -> DriverTrackingDto.builder()
-                        .driverId(driver.getDriverId())
+                        .driverId(driver.getDriverId().toString())
                         .currentLocation(LocationDto.builder()
-                                .latitude(driver.getCurrentLatitude())
-                                .longitude(driver.getCurrentLongitude())
+                                .latitude(BigDecimal.valueOf(driver.getCurrentLatitude()))
+                                .longitude(BigDecimal.valueOf(driver.getCurrentLongitude()))
                                 .build())
                         .status("AVAILABLE")
                         .rating(driver.getRating())
@@ -235,7 +238,7 @@ public class DriverTrackingService {
     public void updateDriverEarnings(String driverId, BigDecimal fare, BigDecimal distance) {
         log.info("Updating driver earnings - Driver: {}, Fare: {}, Distance: {}", driverId, fare, distance);
 
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
@@ -342,13 +345,13 @@ public class DriverTrackingService {
      * Get driver performance metrics
      */
     public DriverTrackingDto getDriverPerformanceMetrics(String driverId) {
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
             // Calculate performance metrics
-            long totalRides = rideRepository.countByDriverIdAndStatus(driverId, Ride.Status.COMPLETED);
-            long cancelledRides = rideRepository.countByDriverIdAndStatus(driverId, Ride.Status.CANCELLED);
+            long totalRides = rideRepository.countByDriverIdAndStatus(driverId, RideStatus.COMPLETED.toString());
+            long cancelledRides = rideRepository.countByDriverIdAndStatus(driverId, RideStatus.CANCELLED.toString());
             double completionRate = totalRides > 0 ? (double) totalRides / (totalRides + cancelledRides) * 100 : 0;
 
             return DriverTrackingDto.builder()

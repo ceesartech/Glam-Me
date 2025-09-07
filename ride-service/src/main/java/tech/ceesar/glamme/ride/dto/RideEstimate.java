@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class RideEstimate {
     private String productId;
     private String displayName;
@@ -22,6 +21,19 @@ public class RideEstimate {
     private Integer duration;
     private BigDecimal surgeMultiplier;
     private String currency;
+
+    // Explicit constructor for builder compatibility
+    public RideEstimate(String productId, String displayName, String estimate,
+                       BigDecimal distance, Integer duration, BigDecimal surgeMultiplier,
+                       String currency) {
+        this.productId = productId;
+        this.displayName = displayName;
+        this.estimate = estimate;
+        this.distance = distance;
+        this.duration = duration;
+        this.surgeMultiplier = surgeMultiplier;
+        this.currency = currency;
+    }
 
     public static RideEstimateBuilder builder() {
         return new RideEstimateBuilder();

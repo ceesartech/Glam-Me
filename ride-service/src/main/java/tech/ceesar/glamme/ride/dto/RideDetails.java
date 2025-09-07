@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class RideDetails {
     private String rideId;
     private String status;
@@ -20,6 +19,19 @@ public class RideDetails {
     private String vehicleModel;
     private String vehicleLicense;
     private Integer eta;
+
+    // Explicit constructor for builder compatibility
+    public RideDetails(String rideId, String status, String driverName,
+                      String driverPhone, String vehicleModel, String vehicleLicense,
+                      Integer eta) {
+        this.rideId = rideId;
+        this.status = status;
+        this.driverName = driverName;
+        this.driverPhone = driverPhone;
+        this.vehicleModel = vehicleModel;
+        this.vehicleLicense = vehicleLicense;
+        this.eta = eta;
+    }
 
     public static RideDetailsBuilder builder() {
         return new RideDetailsBuilder();

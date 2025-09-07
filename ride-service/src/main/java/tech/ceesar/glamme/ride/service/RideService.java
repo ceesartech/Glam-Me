@@ -51,7 +51,7 @@ public class RideService {
     public CreateRideResponse createRide(CreateRideRequest req) {
         // Idempotency check
         String idempotencyKey = generateRideIdempotencyKey(req);
-        if (!idempotencyService.startRideOperation(req.getCustomerId(), idempotencyKey, req)) {
+        if (!idempotencyService.startRideOperation(req.getCustomerId().toString(), idempotencyKey, req)) {
             throw new BadRequestException("Ride creation already in progress");
         }
 
@@ -84,8 +84,8 @@ public class RideService {
 
             } else {
                 // external provider (Uber/Lyft)
-                var bookingRequest = new RideProviderService.RideBookingRequest(
-                        req.getCustomerId(),
+                var bookingRequest = new RideBookingRequest(
+                        req.getCustomerId().toString(),
                         req.getPickupLocation(),
                         req.getDropoffLocation(),
                         req.getProductId(),
@@ -98,13 +98,13 @@ public class RideService {
                     default -> throw new BadRequestException("Unsupported provider: " + req.getProviderType());
                 };
 
-                ride.setExternalRideId(rideRequest.rideId());
+                ride.setExternalRideId(rideRequest.getRideId());
                 ride.setStatus(RideStatus.REQUESTED);
 
                 // Publish external ride requested event
                 rideEventService.publishRideRequested(
-                        rideRequest.rideId(),
-                        req.getCustomerId(),
+                        rideRequest.getRideId(),
+                        req.getCustomerId().toString(),
                         req.getProviderType().toString(),
                         req.getPickupLocation().getLatitude(),
                         req.getPickupLocation().getLongitude(),
@@ -122,20 +122,20 @@ public class RideService {
             idempotencyService.completeOperation(idempotencyKey, ride.getRideRequestId());
 
             log.info("Created ride {} for customer {} with provider {}",
-                    ride.getRideRequestId(), req.getCustomerId(), req.getProviderType());
+                    ride.getRideRequestId(), req.getCustomerId().toString(), req.getProviderType());
 
             return new CreateRideResponse(ride.getRideRequestId(), ride.getExternalRideId());
 
         } catch (Exception e) {
             // Mark idempotency as failed
             idempotencyService.failOperation(idempotencyKey, e.getMessage());
-            log.error("Failed to create ride for customer {}", req.getCustomerId(), e);
+            log.error("Failed to create ride for customer {}", req.getCustomerId().toString(), e);
             throw new RuntimeException("Failed to create ride", e);
         }
     }
 
     private String generateRideIdempotencyKey(CreateRideRequest req) {
-        return "ride:" + req.getCustomerId() + ":" +
+        return "ride:" + req.getCustomerId().toString() + ":" +
                req.getPickupLocation().getLatitude() + ":" +
                req.getPickupLocation().getLongitude() + ":" +
                req.getDropoffLocation().getLatitude() + ":" +
@@ -175,13 +175,13 @@ public class RideService {
 
             if (details != null) {
                 // Update local status based on provider status
-                updateRideStatusFromProvider(ride, details.status());
+                updateRideStatusFromProvider(ride, details.getStatus());
 
                 return new RideStatusResponse(
                         ride.getRideRequestId(),
                         ride.getProviderType(),
                         ride.getStatus(),
-                        details.driverName(),
+                        details.getDriverName(),
                         ride.getDriverId()
                 );
             } else {
@@ -347,7 +347,7 @@ public class RideService {
         rideEventService.publishRideCompleted(
                 rideId.toString(),
                 distKm,
-                mins,
+                (int) mins,
                 fare,
                 "USD"
         );

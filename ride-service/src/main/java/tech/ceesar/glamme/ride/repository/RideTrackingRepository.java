@@ -19,6 +19,9 @@ public interface RideTrackingRepository extends JpaRepository<RideTracking, Long
     
     @Query("SELECT rt FROM RideTracking rt WHERE rt.rideId = :rideId ORDER BY rt.timestamp DESC")
     List<RideTracking> findByRideIdOrderByTimestampDesc(@Param("rideId") String rideId);
+
+    @Query("SELECT rt FROM RideTracking rt WHERE rt.rideId = :rideId ORDER BY rt.timestamp ASC")
+    List<RideTracking> findByRideIdOrderByTimestampAsc(@Param("rideId") String rideId);
     
     @Query("SELECT rt FROM RideTracking rt WHERE rt.driverId = :driverId AND rt.timestamp BETWEEN :startTime AND :endTime")
     List<RideTracking> findByDriverIdAndTimestampBetween(@Param("driverId") String driverId,

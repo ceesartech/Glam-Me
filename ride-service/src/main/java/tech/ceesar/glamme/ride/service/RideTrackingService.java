@@ -13,6 +13,7 @@ import tech.ceesar.glamme.ride.dto.RideTrackingDto;
 import tech.ceesar.glamme.ride.entity.DriverProfile;
 import tech.ceesar.glamme.ride.entity.Ride;
 import tech.ceesar.glamme.ride.entity.RideTracking;
+import tech.ceesar.glamme.ride.entity.RideRequest;
 import tech.ceesar.glamme.ride.repositories.DriverProfileRepository;
 import tech.ceesar.glamme.ride.repository.RideRepository;
 import tech.ceesar.glamme.ride.repository.RideTrackingRepository;
@@ -20,6 +21,7 @@ import tech.ceesar.glamme.ride.repository.RideTrackingRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,7 +49,7 @@ public class RideTrackingService {
                 driverId, location.getLatitude(), location.getLongitude());
 
         // Update driver profile location
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
             driver.setCurrentLatitude(location.getLatitude());
@@ -59,8 +61,8 @@ public class RideTrackingService {
         // Create tracking record
         RideTracking tracking = RideTracking.builder()
                 .driverId(driverId)
-                .latitude(location.getLatitude())
-                .longitude(location.getLongitude())
+                .latitude(BigDecimal.valueOf(location.getLatitude()))
+                .longitude(BigDecimal.valueOf(location.getLongitude()))
                 .heading(heading)
                 .speedMph(speed)
                 .accuracyMeters(accuracy)
@@ -85,8 +87,8 @@ public class RideTrackingService {
         eventPublisher.publishEvent("glamme-bus",
                 java.util.Map.of(
                         "driverId", driverId,
-                        "latitude", location.getLatitude().toString(),
-                        "longitude", location.getLongitude().toString(),
+                        "latitude", String.valueOf(location.getLatitude()),
+                        "longitude", String.valueOf(location.getLongitude()),
                         "heading", heading != null ? heading.toString() : "0",
                         "speed", speed != null ? speed.toString() : "0",
                         "timestamp", LocalDateTime.now().toString()
@@ -104,12 +106,12 @@ public class RideTrackingService {
         log.info("Updating ride progress - Ride: {}, Driver: {}, Distance: {} miles",
                 rideId, driverId, distanceTraveled);
 
-        Optional<Ride> rideOpt = rideRepository.findByRideId(rideId);
+        Optional<RideRequest> rideOpt = rideRepository.findByRideId(rideId);
         if (rideOpt.isPresent()) {
-            Ride ride = rideOpt.get();
+            RideRequest ride = rideOpt.get();
 
             // Update ride with current progress
-            ride.setActualDistanceMiles(distanceTraveled);
+            ride.setActualDistanceMiles(distanceTraveled.doubleValue());
             ride.setUpdatedAt(LocalDateTime.now());
             rideRepository.save(ride);
 
@@ -117,8 +119,8 @@ public class RideTrackingService {
             RideTracking tracking = RideTracking.builder()
                     .rideId(rideId)
                     .driverId(driverId)
-                    .latitude(currentLocation.getLatitude())
-                    .longitude(currentLocation.getLongitude())
+                    .latitude(BigDecimal.valueOf(currentLocation.getLatitude()))
+                    .longitude(BigDecimal.valueOf(currentLocation.getLongitude()))
                     .timestamp(LocalDateTime.now())
                     .build();
 
@@ -141,8 +143,8 @@ public class RideTrackingService {
                     java.util.Map.of(
                             "rideId", rideId,
                             "driverId", driverId,
-                            "latitude", currentLocation.getLatitude().toString(),
-                            "longitude", currentLocation.getLongitude().toString(),
+                            "latitude", String.valueOf(currentLocation.getLatitude()),
+                            "longitude", String.valueOf(currentLocation.getLongitude()),
                             "distanceTraveled", distanceTraveled.toString(),
                             "etaToDestination", etaToDestination != null ? etaToDestination.toString() : "0",
                             "timestamp", LocalDateTime.now().toString()
@@ -156,15 +158,15 @@ public class RideTrackingService {
      * Get driver's current location and status
      */
     public Optional<DriverTrackingDto> getDriverLocation(String driverId) {
-        Optional<DriverProfile> driverOpt = driverRepository.findById(driverId);
+        Optional<DriverProfile> driverOpt = driverRepository.findById(UUID.fromString(driverId));
         if (driverOpt.isPresent()) {
             DriverProfile driver = driverOpt.get();
 
             DriverTrackingDto trackingDto = DriverTrackingDto.builder()
                     .driverId(driverId)
                     .currentLocation(LocationDto.builder()
-                            .latitude(driver.getCurrentLatitude())
-                            .longitude(driver.getCurrentLongitude())
+                              .latitude(BigDecimal.valueOf(driver.getCurrentLatitude()))
+                            .longitude(BigDecimal.valueOf(driver.getCurrentLongitude()))
                             .build())
                     .lastUpdated(driver.getLastLocationUpdate())
                     .status(driver.getAvailable() ? "AVAILABLE" : "BUSY")
@@ -306,10 +308,10 @@ public class RideTrackingService {
      */
     public Integer estimateETA(LocationDto currentLocation, LocationDto destination, double averageSpeedMph) {
         double distance = calculateDistance(
-                currentLocation.getLatitude().doubleValue(),
-                currentLocation.getLongitude().doubleValue(),
-                destination.getLatitude().doubleValue(),
-                destination.getLongitude().doubleValue()
+                currentLocation.getLatitude(),
+                currentLocation.getLongitude(),
+                destination.getLatitude(),
+                destination.getLongitude()
         );
 
         // Estimate time in hours, then convert to minutes
