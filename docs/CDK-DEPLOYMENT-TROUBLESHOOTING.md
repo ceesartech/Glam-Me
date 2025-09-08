@@ -33,6 +33,30 @@ This guide addresses common issues encountered during AWS CDK infrastructure dep
 
 **Prevention**: Always use unique CIDR blocks for different environments or projects.
 
+## Default Security Group Restriction Error
+
+### Error: "UnauthorizedOperation: You are not authorized to perform: ec2:AuthorizeSecurityGroupIngress"
+
+**Problem**: CDK's VPC construct automatically creates a custom resource to restrict the default security group, but the IAM role doesn't have the necessary permissions.
+
+**Root Cause**: The `GlammeVpcRestrictDefaultSecurityGroupCustomResource` requires `ec2:AuthorizeSecurityGroupIngress` permission, which is not included in the default CDK deployment role.
+
+**Solution**:
+1. **Disable default security group restriction** (RECOMMENDED):
+   ```java
+   Vpc vpc = Vpc.Builder.create(this, "GlammeVpc")
+           .restrictDefaultSecurityGroup(false)  // ← Add this line
+           .maxAzs(2)
+           // ... other configuration
+           .build();
+   ```
+
+2. **Add IAM permissions** (alternative):
+   - Add `ec2:AuthorizeSecurityGroupIngress` and `ec2:RevokeSecurityGroupIngress` to the CDK deployment role
+   - More complex but maintains security group restrictions
+
+**Prevention**: Always disable default security group restriction unless you specifically need it and have the required IAM permissions.
+
 ## Recent Fixes Applied
 
 ### ✅ OpenSearch Subnet Configuration Error
