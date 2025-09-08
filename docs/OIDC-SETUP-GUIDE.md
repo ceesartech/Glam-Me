@@ -191,17 +191,27 @@ Run the fix script:
 ./scripts/fix-ecr-permissions.sh
 ```
 
-Or manually update the policy to include:
-```json
-{
-    "Sid": "ECRGlobalAccess",
-    "Effect": "Allow",
-    "Action": [
-        "ecr:GetAuthorizationToken"
-    ],
-    "Resource": "*"
-}
+### SSM Parameter Access Error
+
+If you get this error during CDK deployment:
 ```
+User: arn:aws:sts::ACCOUNT_ID:assumed-role/GlamMe-CICD-Role/GitHubActions is not authorized to perform: ssm:GetParameter on resource: arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/cdk-bootstrap/hnb659fds/version
+```
+
+**Solution**: CDK requires SSM permissions to check bootstrap stack versions.
+
+Run the comprehensive permissions update:
+```bash
+./scripts/update-cicd-permissions.sh
+```
+
+This script adds all necessary permissions for CDK deployment including:
+- SSM access for bootstrap operations
+- CloudFormation full access
+- S3 access for CDK assets
+- IAM permissions for role management
+- EC2 access for VPC resources
+- Lambda, API Gateway, EventBridge, SNS, SQS access
 
 ### Verify Trust Policy
 
