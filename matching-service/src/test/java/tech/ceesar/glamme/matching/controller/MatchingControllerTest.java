@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Disabled("Controller tests disabled due to entity manager factory issues")
+@Disabled("Controller tests disabled due to Spring context loading issues - using unit tests instead")
 @WebMvcTest(MatchingController.class)
 public class MatchingControllerTest {
     @Autowired

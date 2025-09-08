@@ -1,0 +1,48 @@
+# Environment Variables Template for GlamMe Services
+# Copy this file and customize for each service
+
+# Database Configuration
+DB_HOST=your-db-host
+DB_PORT=5432
+DB_USERNAME=glamme_admin
+DB_PASSWORD=your-db-password
+
+# Redis Configuration
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+
+# AWS Configuration
+AWS_REGION=us-east-1
+S3_BUCKET=your-s3-bucket-name
+
+# Cognito Configuration
+COGNITO_USER_POOL_ID=your-cognito-pool-id
+COGNITO_CLIENT_ID=your-cognito-client-id
+
+# OpenSearch Configuration
+OPENSEARCH_ENDPOINT=your-opensearch-endpoint
+
+# JWT Configuration
+JWT_SECRET=your-256-bit-jwt-secret-here
+
+# Service-Specific Configuration
+# For Shopping Service
+STRIPE_API_KEY=your-stripe-api-key
+STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+EASYPOST_API_KEY=your-easypost-api-key
+
+# For Image Service
+OPENAI_API_KEY=your-openai-api-key
+
+# For Communication Service
+SES_FROM_EMAIL=noreply@glamme.com
+
+# For Auth Service (additional)
+OAUTH_GOOGLE_CLIENT_ID=your-google-client-id
+OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Logging Level
+LOGGING_LEVEL=INFO
+
+# Application Profile
+SPRING_PROFILES_ACTIVE=prod
