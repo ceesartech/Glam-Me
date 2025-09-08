@@ -158,7 +158,7 @@ class GlammeVpcStack extends Stack {
                         .build())
                 .vpc(vpc)
                 .vpcSubnets(Arrays.asList(SubnetSelection.builder()
-                        .subnetType(software.amazon.awscdk.services.ec2.SubnetType.PRIVATE_WITH_EGRESS)
+                        .subnets(Arrays.asList(vpc.getPrivateSubnets().get(0)))
                         .build()))
                 .securityGroups(Arrays.asList(dbSecurityGroup))
                 .ebs(EbsOptions.builder()
