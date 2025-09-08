@@ -42,17 +42,24 @@ This guide addresses common issues encountered during AWS CDK infrastructure dep
 You must specify exactly one subnet. (Service: OpenSearch, Status Code: 400)
 ```
 
-**Root Cause**: OpenSearch domain was configured with a VPC but didn't specify which subnets to use.
+**Root Cause**: OpenSearch domain was configured to use `PRIVATE_WITH_EGRESS` subnet type, but the VPC creates multiple subnets of this type (one per AZ), and OpenSearch requires exactly one subnet.
 
 **Solution Applied**:
-- Added `vpcSubnets` configuration to OpenSearch domain
-- Specified `PRIVATE_WITH_EGRESS` subnet type
+- Changed from `subnetType` selection to specific subnet selection
+- OpenSearch now uses `vpc.getPrivateSubnets().get(0)` (first private subnet)
+- This ensures exactly one subnet is selected (us-east-1a, 172.16.2.0/24)
 - Fixed type compatibility issue (SubnetSelection vs List<SubnetSelection>)
 
 **Code Fix**:
 ```java
+// Before (caused error - multiple subnets)
 .vpcSubnets(Arrays.asList(SubnetSelection.builder()
         .subnetType(software.amazon.awscdk.services.ec2.SubnetType.PRIVATE_WITH_EGRESS)
+        .build()))
+
+// After (fixed - exactly one subnet)
+.vpcSubnets(Arrays.asList(SubnetSelection.builder()
+        .subnets(Arrays.asList(vpc.getPrivateSubnets().get(0)))
         .build()))
 ```
 
