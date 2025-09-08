@@ -177,6 +177,32 @@ After setting up the OIDC provider and GitHub secrets:
 2. **Missing Permissions**: Ensure the IAM policy has all necessary permissions for ECR, ECS, and CloudFormation
 3. **Region Mismatch**: Make sure the AWS region in GitHub secrets matches your AWS CLI configuration
 
+### ECR Authorization Token Error
+
+If you get this error:
+```
+User: arn:aws:sts::ACCOUNT_ID:assumed-role/GlamMe-CICD-Role/GitHubActions is not authorized to perform: ecr:GetAuthorizationToken
+```
+
+**Solution**: The `ecr:GetAuthorizationToken` action must be allowed globally (Resource: "*"), not restricted to specific repositories.
+
+Run the fix script:
+```bash
+./scripts/fix-ecr-permissions.sh
+```
+
+Or manually update the policy to include:
+```json
+{
+    "Sid": "ECRGlobalAccess",
+    "Effect": "Allow",
+    "Action": [
+        "ecr:GetAuthorizationToken"
+    ],
+    "Resource": "*"
+}
+```
+
 ### Verify Trust Policy
 
 Check that your trust policy allows the correct repository:
