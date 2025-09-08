@@ -1,0 +1,135 @@
+plugins {
+    id 'java'
+}
+
+group = 'tech.ceesar.glamme'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 5 for testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Common module for shared DTOs
+    implementation project(':common')
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    
+    // Set test environment properties
+    systemProperty 'spring.profiles.active', 'integration-test'
+    systemProperty 'logging.level.tech.ceesar.glamme', 'INFO'
+    
+    // Increase timeout for integration tests
+    timeout = Duration.ofMinutes(10)
+    
+    // Parallel execution
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    
+    // Test reporting
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+}
+
+// Task to run only integration tests
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    
+    description = 'Runs integration tests for the entire GlamMe platform'
+    group = 'verification'
+    
+    systemProperty 'spring.profiles.active', 'integration-test'
+    timeout = Duration.ofMinutes(15)
+}
+
+}
+
+group = 'tech.ceesar.glamme'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 5 for testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Common module for shared DTOs
+    implementation project(':common')
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    
+    // Set test environment properties
+    systemProperty 'spring.profiles.active', 'integration-test'
+    systemProperty 'logging.level.tech.ceesar.glamme', 'INFO'
+    
+    // Increase timeout for integration tests
+    timeout = Duration.ofMinutes(10)
+    
+    // Parallel execution
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    
+    // Test reporting
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+}
+
+// Task to run only integration tests
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    
+    description = 'Runs integration tests for the entire GlamMe platform'
+    group = 'verification'
+    
+    systemProperty 'spring.profiles.active', 'integration-test'
+    timeout = Duration.ofMinutes(15)
+}

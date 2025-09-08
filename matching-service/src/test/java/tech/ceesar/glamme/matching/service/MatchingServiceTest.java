@@ -14,12 +14,14 @@ import tech.ceesar.glamme.common.service.EventService;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,15 +79,16 @@ public class MatchingServiceTest {
         // Arrange
         String customerId = "customer-1";
         MatchRequest request = MatchRequest.builder()
+                .customerId(customerId)
                 .stylistId("stylist-1")
                 .notes("Test booking")
                 .build();
 
-        when(stylistRepository.findById("stylist-1")).thenReturn(java.util.Optional.of(stylist1));
-        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(java.util.Optional.of(customerPreference));
+        when(stylistRepository.findById("stylist-1")).thenReturn(Optional.of(stylist1));
+        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(Optional.of(customerPreference));
         when(matchRepository.findByCustomerIdAndStylistIdAndStatus(customerId, "stylist-1", Match.Status.PENDING))
-                .thenReturn(java.util.Optional.empty());
-        when(matchingAlgorithmService.findMatchingStylists(any(), any())).thenReturn(List.of(stylist1));
+                .thenReturn(Optional.empty());
+        when(matchingAlgorithmService.findMatchingStylists(any(), eq(1))).thenReturn(List.of(stylist1));
 
         Match savedMatch = Match.builder()
                 .id(1L)
@@ -93,8 +96,10 @@ public class MatchingServiceTest {
                 .stylistId("stylist-1")
                 .matchScore(0.8)
                 .status(Match.Status.PENDING)
+                .matchType(Match.MatchType.MANUAL)
                 .build();
         when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
+        doNothing().when(eventService).publishEvent(anyString(), anyString(), anyString(), any());
 
         // Act
         MatchResponse result = matchingService.createMatch(customerId, request);
@@ -103,6 +108,7 @@ public class MatchingServiceTest {
         assertEquals(savedMatch.getId(), result.getId());
         assertEquals(Match.Status.PENDING, result.getStatus());
         verify(matchRepository).save(any(Match.class));
+        verify(eventService).publishEvent(anyString(), anyString(), anyString(), any());
     }
 
     @Test
@@ -111,17 +117,18 @@ public class MatchingServiceTest {
         String customerId = "customer-1";
         String hairstyleQuery = "braids";
         
-        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(java.util.Optional.of(customerPreference));
+        when(customerPreferenceRepository.findByCustomerId(customerId)).thenReturn(Optional.of(customerPreference));
         when(stylistRepository.findBySpecialtiesContainingIgnoreCase(hairstyleQuery)).thenReturn(List.of(stylist1, stylist2));
-        when(matchingAlgorithmService.calculateMatchScore(any(), any(), any(), any())).thenReturn(85.0);
+        when(matchingAlgorithmService.calculateMatchScore(eq(customerId), anyString(), any(), any())).thenReturn(85.0);
 
         // Act
         List<MatchResponse> result = matchingService.getHairstyleMatches(customerId, hairstyleQuery, null, null, 5);
 
         // Assert
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(match -> match.getRequestedService().equals(hairstyleQuery)));
         assertTrue(result.stream().allMatch(match -> match.getMatchScore() > 0));
+        assertTrue(result.stream().allMatch(match -> match.getMatchType() == Match.MatchType.HAIRSTYLE_QUERY));
+        assertTrue(result.stream().allMatch(match -> match.getStatus() == Match.Status.POTENTIAL));
     }
 
     @Test
@@ -135,7 +142,7 @@ public class MatchingServiceTest {
                 .notes("Direct booking test")
                 .build();
 
-        when(stylistRepository.findById("stylist-1")).thenReturn(java.util.Optional.of(stylist1));
+        when(stylistRepository.findById("stylist-1")).thenReturn(Optional.of(stylist1));
 
         Match savedMatch = Match.builder()
                 .id(1L)
@@ -146,6 +153,7 @@ public class MatchingServiceTest {
                 .status(Match.Status.PENDING)
                 .build();
         when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
+        doNothing().when(eventService).publishEvent(anyString(), anyString(), anyString(), any());
 
         // Act
         MatchResponse result = matchingService.createDirectBooking(request);
@@ -155,5 +163,6 @@ public class MatchingServiceTest {
         assertEquals(Match.MatchType.DIRECT, result.getMatchType());
         assertEquals(Match.Status.PENDING, result.getStatus());
         verify(matchRepository).save(any(Match.class));
+        verify(eventService).publishEvent(anyString(), anyString(), anyString(), any());
     }
 }

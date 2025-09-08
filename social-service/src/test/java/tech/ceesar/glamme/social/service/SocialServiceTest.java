@@ -9,6 +9,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import tech.ceesar.glamme.common.dto.PagedResponse;
+import tech.ceesar.glamme.common.exception.BadRequestException;
 import tech.ceesar.glamme.social.dto.CreatePostRequest;
 import tech.ceesar.glamme.social.dto.CreatePostResponse;
 import tech.ceesar.glamme.social.dto.PostResponse;
@@ -22,8 +23,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -150,4 +153,109 @@ public class SocialServiceTest {
         PagedResponse<PostResponse> feed = service.getFeed(u1,0,1);
         assertEquals(1, feed.getContent().size());
     }
+
+    @Test
+    void createPost_withoutMedia_Success() {
+        UUID userId = UUID.randomUUID();
+        CreatePostRequest req = new CreatePostRequest();
+        req.setCaption("Text-only post");
+        req.setStylistIds(List.of());
+
+        Post savedPost = new Post();
+        savedPost.setPostId(UUID.randomUUID());
+        savedPost.setUserId(userId);
+        savedPost.setCaption("Text-only post");
+        when(postRepo.save(any())).thenReturn(savedPost);
+
+        CreatePostResponse resp = service.createPost(userId, req, List.of());
+
+        assertEquals(savedPost.getPostId(), resp.getPostId());
+        verify(postRepo).save(any());
+        // Should not upload any media
+        verify(s3, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+    }
+
+    @Test
+    void likePost_alreadyLiked_DoesNothing() {
+        UUID uid = UUID.randomUUID(), pid = UUID.randomUUID();
+        Like existingLike = new Like(); 
+        existingLike.setLikeId(UUID.randomUUID());
+        
+        when(likeRepo.findByUserIdAndPostId(uid, pid)).thenReturn(Optional.of(existingLike));
+        
+        service.likePost(uid, pid);
+        
+        // Should not save a new like
+        verify(likeRepo, never()).save(any());
+    }
+
+    @Test
+    void followUser_alreadyFollowing_ThrowsException() {
+        UUID follower = UUID.randomUUID(), followed = UUID.randomUUID();
+        when(followRepo.existsByFollowerIdAndFollowedId(follower, followed)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> service.follow(follower, followed));
+
+        // Should not save a new follow relationship
+        verify(followRepo, never()).save(any());
+    }
+
+    @Test
+    void blockUser_alreadyBlocked_ThrowsException() {
+        UUID blocker = UUID.randomUUID(), blocked = UUID.randomUUID();
+        when(blockRepo.existsByBlockerIdAndBlockedId(blocker, blocked)).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> service.block(blocker, blocked));
+
+        // Should not save a new block relationship
+        verify(blockRepo, never()).save(any());
+    }
+
+    @Test
+    void getFeed_withBlockedUsers_FiltersOut() {
+        UUID u1 = UUID.randomUUID(), u2 = UUID.randomUUID(), u3 = UUID.randomUUID();
+        
+        // User follows both u2 and u3
+        when(followRepo.findByFollowerId(u1))
+                .thenReturn(List.of(
+                    new Follow(null, u1, u2, null),
+                    new Follow(null, u1, u3, null)
+                ));
+        
+        Post p2 = new Post(); p2.setPostId(UUID.randomUUID()); p2.setUserId(u2);
+        Post p3 = new Post(); p3.setPostId(UUID.randomUUID()); p3.setUserId(u3);
+        
+        Page<Post> page = new PageImpl<>(List.of(p2, p3), PageRequest.of(0, 10), 2);
+        when(postRepo.findByUserIdIn(any(), any())).thenReturn(page);
+        
+        // u1 has blocked u3
+        when(blockRepo.existsByBlockerIdAndBlockedId(u1, u2)).thenReturn(false);
+        when(blockRepo.existsByBlockerIdAndBlockedId(u1, u3)).thenReturn(true);
+        
+        // Mock other dependencies for p2 only (p3 should be filtered out)
+        when(mediaRepo.findAllByPostId(p2.getPostId())).thenReturn(List.of());
+        when(tagRepo.findByPostId(p2.getPostId())).thenReturn(List.of());
+        when(likeRepo.countByPostId(p2.getPostId())).thenReturn(5L);
+        when(commentRepo.countByPostId(p2.getPostId())).thenReturn(2L);
+        when(postRepo.countByOriginalPostId(p2.getPostId())).thenReturn(1L);
+
+        PagedResponse<PostResponse> feed = service.getFeed(u1, 0, 10);
+        
+        // Should only contain post from u2 (u3 is blocked)
+        assertEquals(1, feed.getContent().size());
+    }
+
+    @Test
+    void repost_postNotFound_ThrowsException() {
+        UUID userId = UUID.randomUUID();
+        UUID nonExistentPostId = UUID.randomUUID();
+        
+        when(postRepo.findById(nonExistentPostId)).thenReturn(Optional.empty());
+        
+        assertThrows(RuntimeException.class, () -> 
+            service.repost(userId, nonExistentPostId));
+        
+        verify(postRepo, never()).save(any());
+    }
 }
+

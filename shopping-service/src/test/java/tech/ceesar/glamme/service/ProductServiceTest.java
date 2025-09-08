@@ -16,6 +16,8 @@ import tech.ceesar.glamme.shopping.dto.ProductResponse;
 import tech.ceesar.glamme.shopping.entity.Product;
 import tech.ceesar.glamme.shopping.repositories.ProductRepository;
 import tech.ceesar.glamme.shopping.service.ProductService;
+import tech.ceesar.glamme.common.service.RedisCacheService;
+import tech.ceesar.glamme.common.event.EventPublisher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +27,8 @@ import static org.mockito.Mockito.when;
 public class ProductServiceTest {
     @Mock ProductRepository repo;
     @Mock S3Client s3;
+    @Mock RedisCacheService cacheService;
+    @Mock EventPublisher eventPublisher;
     @InjectMocks ProductService productService;
 
     @BeforeEach
@@ -38,18 +42,32 @@ public class ProductServiceTest {
         MockMultipartFile img = new MockMultipartFile(
                 "image","img.png","image/png","data".getBytes());
         CreateProductRequest req = new CreateProductRequest();
-        req.setName("X"); req.setDescription("D");
-        req.setPrice(10); req.setWeight(100);
-        req.setSku("SKU1"); req.setImage(img);
+        req.setName("Test Product"); 
+        req.setDescription("Test Description");
+        req.setPrice(25.99); 
+        req.setWeight(100);
+        req.setSku("SKU123"); 
+        req.setImage(img);
 
-        when(repo.save(any(Product.class)))
-                .thenAnswer(i->i.getArgument(0));
+        // Mock saved product with ID
+        Product savedProduct = Product.builder()
+                .productId(java.util.UUID.randomUUID())
+                .name("Test Product")
+                .description("Test Description")
+                .price(25.99)
+                .weight(100)
+                .sku("SKU123")
+                .imageUrl("https://test-bucket.s3.amazonaws.com/products/test-image.png")
+                .build();
+
+        when(repo.save(any(Product.class))).thenReturn(savedProduct);
         when(s3.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
         ProductResponse r = productService.create(req);
-        assertEquals("X", r.getName());
-        assertTrue(r.getImageUrl().contains("bucket"));
-        assertTrue(r.getImageUrl().contains("https://test-bucket.s3.amazonaws.com/"));
+        assertEquals("Test Product", r.getName());
+        assertEquals("Test Description", r.getDescription());
+        assertEquals(25.99, r.getPrice());
+        assertTrue(r.getImageUrl().contains("test-bucket"));
     }
 }

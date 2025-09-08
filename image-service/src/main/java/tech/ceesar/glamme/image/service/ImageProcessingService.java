@@ -68,6 +68,8 @@ public class ImageProcessingService {
 
         } catch (IOException ex) {
             throw new ImageProcessingException("Image processing failed", ex);
+        } catch (Exception ex) {
+            throw new ImageProcessingException("Image processing failed", ex);
         }
     }
 

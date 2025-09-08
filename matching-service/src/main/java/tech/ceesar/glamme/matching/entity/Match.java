@@ -27,7 +27,7 @@ public class Match {
     @Column(name = "stylist_id", nullable = false)
     private String stylistId;
     
-    @Column(name = "match_score", precision = 5, scale = 2)
+    @Column(name = "match_score")
     private Double matchScore;
     
     @Column(name = "match_type")

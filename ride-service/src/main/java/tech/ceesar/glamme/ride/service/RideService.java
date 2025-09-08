@@ -66,6 +66,9 @@ public class RideService {
             ride.setDropoffLongitude(req.getDropoffLocation().getLongitude());
             ride.setStatus(RideStatus.REQUESTED);
 
+            // Generate ID for the ride before using it
+            ride.setRideRequestId(UUID.randomUUID());
+            
             if (req.getProviderType() == ProviderType.INTERNAL) {
                 // dispatch internal
                 DriverProfile driver = dispatchInternalRide(ride);
@@ -224,7 +227,7 @@ public class RideService {
 
         if (ride.getStatus() == RideStatus.CANCELLED
                 || ride.getStatus() == RideStatus.COMPLETED) {
-            return new CancelRideResponse(false, "Ride is already " + ride.getStatus());
+            throw new BadRequestException("Cannot cancel ride that is already " + ride.getStatus());
         }
 
         boolean cancelled = false;
@@ -284,6 +287,10 @@ public class RideService {
 
         if (ride.getStatus() == RideStatus.COMPLETED) {
             return new RideCompleteResponse(ride.getRideRequestId(), ride.getActualFare(), ride.getCurrency());
+        }
+        
+        if (ride.getStatus() != RideStatus.IN_PROGRESS) {
+            throw new BadRequestException("Cannot complete ride that is not in progress");
         }
 
         // mark complete

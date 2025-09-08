@@ -96,4 +96,75 @@ public class AuthServiceTest {
         JwtAuthenticationResponse authResponse = authService.authenticateUser(loginRequest);
         assertEquals("jwt", authResponse.getAccessToken());
     }
+
+    @Test
+    void registerUser_withNullFields_HandlesGracefully() {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setEmail("test@example.com");
+        registerRequest.setName(null); // Null name
+        registerRequest.setPassword("password123");
+
+        when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
+            u.setId(UUID.randomUUID());
+            return u;
+        });
+        when(tokenProvider.generateToken(any(UUID.class))).thenReturn("token");
+
+        // The service handles null fields gracefully
+        JwtAuthenticationResponse response = authService.registerUser(registerRequest);
+        assertEquals("token", response.getAccessToken());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void registerUser_withInvalidEmail_ThrowsException() {
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setName("Test User");
+        registerRequest.setEmail("invalid-email");
+        registerRequest.setPassword("password123");
+
+        // This would be caught by validation in a real scenario
+        when(userRepository.existsByEmail("invalid-email")).thenReturn(false);
+        
+        // The service should handle this gracefully
+        assertThrows(Exception.class, () -> authService.registerUser(registerRequest));
+    }
+
+    @Test
+    void authenticateUser_userNotFound_ThrowsException() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("nonexistent@testglamme.com");
+        loginRequest.setPassword("password");
+
+        when(authManager.authenticate(any())).thenReturn(null);
+        when(userRepository.findByEmail("nonexistent@testglamme.com")).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> authService.authenticateUser(loginRequest));
+    }
+
+    @Test
+    void registerUser_subscriptionTypes_Success() {
+        // Test FREE subscription
+        RegisterRequest freeRequest = new RegisterRequest();
+        freeRequest.setName("Free User");
+        freeRequest.setEmail("free@testglamme.com");
+        freeRequest.setPassword("password");
+        freeRequest.setSubscriptionType(SubscriptionType.FREE);
+
+        when(userRepository.existsByEmail(freeRequest.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
+            u.setId(UUID.randomUUID());
+            return u;
+        });
+        when(tokenProvider.generateToken(any(UUID.class))).thenReturn("freeToken");
+
+        JwtAuthenticationResponse response = authService.registerUser(freeRequest);
+        assertEquals("freeToken", response.getAccessToken());
+        verify(userRepository).save(argThat(user -> user.getSubscriptionType() == SubscriptionType.FREE));
+    }
 }

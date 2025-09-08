@@ -141,13 +141,14 @@ public class SocialService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Post> postsPage = postRepo.findByUserIdIn(followees, pageable);
 
-        // 3) Map each Post entity *directly* to PostResponse
-        List<PostResponse> dtos = postsPage.getContent().stream().map(p -> {
-            // Block‐check
-            if (blockRepo.existsByBlockerIdAndBlockedId(p.getUserId(), userId) ||
-                    blockRepo.existsByBlockerIdAndBlockedId(userId, p.getUserId())) {
-                throw new BadRequestException("Post not accessible");
-            }
+        // 3) Map each Post entity *directly* to PostResponse, filtering out blocked posts
+        List<PostResponse> dtos = postsPage.getContent().stream()
+            .filter(p -> {
+                // Block-check: skip posts from/to blocked users
+                return !blockRepo.existsByBlockerIdAndBlockedId(p.getUserId(), userId) &&
+                       !blockRepo.existsByBlockerIdAndBlockedId(userId, p.getUserId());
+            })
+            .map(p -> {
 
             // Media
             List<MediaDto> mediaDtos = mediaRepo.findAllByPostId(p.getPostId()).stream()
@@ -293,3 +294,4 @@ public class SocialService {
         return new CreatePostResponse(rp.getPostId());
     }
 }
+
