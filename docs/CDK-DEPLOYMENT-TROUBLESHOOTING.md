@@ -3,6 +3,36 @@
 ## Overview
 This guide addresses common issues encountered during AWS CDK infrastructure deployment for the GlamMe platform.
 
+## CIDR Conflicts
+
+### Error: "The CIDR '10.0.x.0/24' conflicts with another subnet"
+
+**Problem**: The CDK is trying to create subnets with CIDR blocks that already exist in your AWS account.
+
+**Root Cause**: There's already a VPC with similar subnet configurations deployed.
+
+**Solution**:
+1. **Check existing VPCs**:
+   ```bash
+   aws ec2 describe-vpcs --query 'Vpcs[].{VpcId:VpcId,CidrBlock:CidrBlock,State:State}' --output table
+   ```
+
+2. **Check existing subnets**:
+   ```bash
+   aws ec2 describe-subnets --query 'Subnets[].{SubnetId:SubnetId,CidrBlock:CidrBlock,VpcId:VpcId}' --output table
+   ```
+
+3. **Use different CIDR block** (RECOMMENDED):
+   - The CDK has been updated to use `172.16.0.0/16` instead of `10.0.0.0/16`
+   - This avoids conflicts with existing subnets
+
+4. **Clean up conflicting resources** (if safe):
+   ```bash
+   ./scripts/cleanup-conflicting-vpc.sh
+   ```
+
+**Prevention**: Always use unique CIDR blocks for different environments or projects.
+
 ## Recent Fixes Applied
 
 ### ✅ OpenSearch Subnet Configuration Error
