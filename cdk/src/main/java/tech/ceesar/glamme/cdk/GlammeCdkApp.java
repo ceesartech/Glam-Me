@@ -6,6 +6,7 @@ import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.ec2.Vpc;
 import software.amazon.awscdk.services.ec2.SubnetSelection;
+import software.amazon.awscdk.services.ec2.SubnetConfiguration;
 import software.amazon.awscdk.services.ec2.SecurityGroup;
 import software.amazon.awscdk.services.ecr.Repository;
 import software.amazon.awscdk.services.ecr.IRepository;
@@ -71,6 +72,23 @@ class GlammeVpcStack extends Stack {
         // Create VPC with public and private subnets
         Vpc vpc = Vpc.Builder.create(this, "GlammeVpc")
                 .maxAzs(2)
+                .subnetConfiguration(java.util.Arrays.asList(
+                        SubnetConfiguration.builder()
+                                .name("Public")
+                                .subnetType(software.amazon.awscdk.services.ec2.SubnetType.PUBLIC)
+                                .cidrMask(24)
+                                .build(),
+                        SubnetConfiguration.builder()
+                                .name("Private-App")
+                                .subnetType(software.amazon.awscdk.services.ec2.SubnetType.PRIVATE_WITH_EGRESS)
+                                .cidrMask(24)
+                                .build(),
+                        SubnetConfiguration.builder()
+                                .name("Private-Data")
+                                .subnetType(software.amazon.awscdk.services.ec2.SubnetType.PRIVATE_ISOLATED)
+                                .cidrMask(24)
+                                .build()
+                ))
                 .natGateways(1)
                 .build();
 
