@@ -86,7 +86,8 @@ cdk.out/
 # AWS Credentials and Configuration
 .aws/
 credentials
-config
+# Ignore AWS config files but not Java config directories
+.aws/config
 
 # Environment variables
 .env
