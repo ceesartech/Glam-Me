@@ -74,6 +74,7 @@ class GlammeVpcStack extends Stack {
         Vpc vpc = Vpc.Builder.create(this, "GlammeVpc")
                 .maxAzs(2)
                 .ipAddresses(IpAddresses.cidr("172.16.0.0/16"))
+                .restrictDefaultSecurityGroup(false)
                 .subnetConfiguration(java.util.Arrays.asList(
                         SubnetConfiguration.builder()
                                 .name("Public")
